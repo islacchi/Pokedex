@@ -1,39 +1,83 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Pokedex</title>
-    <link rel="icon" href="./assets/images/icono-pokemon.png" type="text/x-icon">
+    <title>Pokédex</title>
+    <link rel="icon" href="./assets/images/icono-pokemon.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
 </head>
-<body background="images/bg1.png">
-<div class="main">
-    <!--Header-->
-    <div class="header">
-            <img class="logo-pokemon"src="assets/images/pokemon.png" alt="logo-pokemon">
-            <input id="myInput" type="text" placeholder="Search Pokemon...">
-    </div>
-   
-    <!--Content-->
-    <div class="container">
-        <div id="elementos"></div>
+<body>
+<div class="pokedex-frame">
+    <!-- Header / Top Frame -->
+    <div class="pokedex-header">
+        <div class="header-lights">
+            <span class="light light-blue"></span>
+            <span class="light light-red"></span>
+            <span class="light light-yellow"></span>
+            <span class="light light-green"></span>
+        </div>
+        <img class="logo-pokemon" src="assets/images/pokemon.png" alt="Pokémon">
+        <input id="myInput" type="text" placeholder="Search by name or #...">
     </div>
 
-    <!--Specific Pokemon-->
-    <div class="individual">
-        <div class="container-ind">
-            <div  id="elementos-pkm"></div>
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span>Loading Pokédex…</span>
+    </div>
+
+    <!-- Screen Area -->
+    <div class="pokedex-screen">
+        <!-- List View -->
+        <div id="list-view" class="view visible">
+            <!-- Filter Bars -->
+            <div class="filter-bar generation-filter-bar">
+                <span class="filter-label">Gen:</span>
+                <button class="gen-chip active" data-gen="all">All</button>
+                <button class="gen-chip" data-gen="1">1</button>
+                <button class="gen-chip" data-gen="2">2</button>
+                <button class="gen-chip" data-gen="3">3</button>
+                <button class="gen-chip" data-gen="4">4</button>
+                <button class="gen-chip" data-gen="5">5</button>
+                <button class="gen-chip" data-gen="6">6</button>
+                <button class="gen-chip" data-gen="7">7</button>
+                <button class="gen-chip" data-gen="8">8</button>
+                <button class="gen-chip" data-gen="9">9</button>
+            </div>
+            <div class="filter-bar type-filter-bar">
+                <span class="filter-label">Type:</span>
+                <div id="type-chips" class="type-chips"></div>
+                <button id="clear-types" class="clear-filters" title="Clear type filter">✕</button>
+            </div>
+            <div id="elementos" class="pokemon-grid"></div>
+        </div>
+
+        <!-- Detail View -->
+        <div id="detail-view" class="view hidden">
+            <div class="detail-card">
+                <div id="elementos-pkm"></div>
+                <button class="back-btn">← Back</button>
+            </div>
         </div>
     </div>
-    
 
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="js/assets/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Bottom Frame -->
+    <div class="pokedex-bottom">
+        <div class="speaker-grill">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+        </div>
+    </div>
 </div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

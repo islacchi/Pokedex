@@ -235,7 +235,12 @@ body {
   min-height: 500px;
   max-height: 650px;
   overflow-y: auto;
+  transition: max-height 0.3s ease;
   box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
+}
+
+.pokedex-screen.detail-open {
+  max-height: none;
 }
 
 .pokedex-screen::-webkit-scrollbar {
@@ -443,6 +448,7 @@ body {
   border: 2px solid transparent;
   transition: border-color 0.2s;
   min-width: 70px;
+  cursor: pointer;
 }
 
 .evo-node.current {

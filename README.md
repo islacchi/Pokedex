@@ -6,11 +6,14 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 
 ### List View
 - Responsive card grid showing all 1025 Pokémon (dex number, sprite, name, type badges)
+- **Animated sprites** from Pokemon Showdown (falls back to static sprite if unavailable)
+- **Type-tinted card backgrounds** — each card is subtly tinted with its primary type color
 - Scroll-aware batch loading — fetches data in small batches as you scroll
 - Image lazy-loading via IntersectionObserver
 - Type badges color-coded to match each of the 18 Pokémon types
 - **Favorite star** on every card — toggle favorites with one click (persisted in localStorage)
 - **No-results state** — friendly message when search/filters match nothing
+- **Random Pokémon button** (🎲) in the header — jumps to a random Pokémon's detail view
 
 ### Filters & Sorting
 - **Text search** — filters by name or dex number as you type (debounced 200ms to prevent lag)
@@ -23,9 +26,11 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 ### Detail View
 - Large official artwork sprite
 - **Shiny toggle** — swap between normal and shiny artwork with one click
+- **Cry playback** (🔊) — plays the Pokémon's cry (uses PokeAPI cries, falls back to pokemoncries.com)
 - Dex number, capitalized name, and type badges
 - **Favorite star** in the detail view
 - Flavor text description (fetched from `/pokemon-species/{id}`)
+- **Type Matchups** — shows offensive/defensive type effectiveness (×2, ×½, ×0) computed from a static type chart
 - **About section** — height, weight, abilities (with hidden-ability tag), and base experience
 - **Evolution chain** with branching support:
   - Linear chains (e.g. Charmander → Charmeleon → Charizard)
@@ -35,6 +40,7 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
   - Sprite thumbnails for each evolution stage
 - **Base stats** visualized as horizontal bars scaled to max 255 (color-coded per stat)
 - **Prev / Next navigation** — browse Pokémon sequentially without returning to the list
+- **Keyboard navigation** — Arrow keys for prev/next, Escape to go back, `/` to focus search, Enter to open first card
 
 ### Reliability
 - Concurrency-limited API fetching (6 simultaneous requests max)

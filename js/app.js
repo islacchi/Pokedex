@@ -46,6 +46,51 @@ $(document).ready(function () {
     steel:'#B7B7CE', fairy:'#D685AD'
   };
 
+  // ── Type Matchup Chart (attacking type -> defending type multiplier) ──
+  // Static table — no extra API calls needed
+  var typeChart = {
+    normal:   { rock:0.5, ghost:0, steel:0.5 },
+    fire:     { fire:0.5, water:0.5, grass:2, ice:2, bug:2, rock:0.5, dragon:0.5, steel:2 },
+    water:    { fire:2, water:0.5, grass:0.5, ground:2, rock:2, dragon:0.5 },
+    electric: { water:2, electric:0.5, grass:0.5, ground:0, flying:2, dragon:0.5 },
+    grass:    { fire:0.5, water:2, grass:0.5, poison:0.5, ground:2, flying:0.5, bug:0.5, rock:2, dragon:0.5, steel:0.5 },
+    ice:      { fire:0.5, water:0.5, grass:2, ice:0.5, ground:2, flying:2, dragon:2, steel:0.5 },
+    fighting: { normal:2, ice:2, poison:0.5, flying:0.5, psychic:0.5, bug:0.5, rock:2, ghost:0, dark:2, steel:2, fairy:0.5 },
+    poison:   { grass:2, poison:0.5, ground:0.5, rock:0.5, ghost:0.5, steel:0, fairy:2 },
+    ground:   { fire:2, electric:2, grass:0.5, poison:2, flying:0, bug:0.5, rock:2, steel:2 },
+    flying:   { electric:0.5, grass:2, fighting:2, bug:2, rock:0.5, steel:0.5 },
+    psychic:  { fighting:2, poison:2, psychic:0.5, dark:0, steel:0.5 },
+    bug:      { fire:0.5, grass:2, fighting:0.5, poison:0.5, flying:0.5, psychic:2, ghost:0.5, dark:2, steel:0.5, fairy:0.5 },
+    rock:     { fire:2, ice:2, fighting:0.5, ground:0.5, flying:2, bug:2, steel:0.5 },
+    ghost:    { normal:0, psychic:2, ghost:2, dark:0.5 },
+    dragon:   { dragon:2, steel:0.5, fairy:0 },
+    dark:     { fighting:0.5, psychic:2, ghost:2, dark:0.5, fairy:0.5 },
+    steel:    { fire:0.5, water:0.5, electric:0.5, ice:2, rock:2, steel:0.5, fairy:2 },
+    fairy:    { fire:0.5, fighting:2, poison:0.5, dragon:2, dark:2, steel:0.5 }
+  };
+
+  // Defensive type chart: defending type -> attacking type multiplier
+  var defensiveChart = {
+    normal:   { fighting:2, ghost:0 },
+    fire:     { fire:0.5, water:2, grass:0.5, ice:0.5, ground:2, bug:0.5, rock:2, steel:0.5, fairy:0.5 },
+    water:    { fire:0.5, water:0.5, electric:2, grass:2, ice:0.5, steel:0.5 },
+    electric: { electric:0.5, ground:2, flying:0.5, steel:0.5 },
+    grass:    { fire:2, water:0.5, electric:0.5, grass:0.5, ice:2, poison:2, ground:0.5, flying:2, bug:2, dragon:0.5, steel:0.5 },
+    ice:      { fire:2, ice:0.5, fighting:2, rock:2, steel:2 },
+    fighting: { flying:2, psychic:2, bug:0.5, rock:0.5, ghost:0, dark:0.5, fairy:2 },
+    poison:   { grass:0.5, fighting:0.5, poison:0.5, ground:2, psychic:2, bug:0.5, fairy:0.5 },
+    ground:   { water:2, electric:0, grass:2, ice:2, poison:0.5, rock:0.5 },
+    flying:   { electric:2, grass:0.5, fighting:0.5, bug:0.5, rock:2, steel:0.5 },
+    psychic:  { fighting:0.5, psychic:0.5, bug:2, ghost:2, dark:2 },
+    bug:      { fire:2, grass:0.5, fighting:0.5, ground:0.5, flying:2, rock:2, ghost:0.5, steel:0.5 },
+    rock:     { normal:0.5, fire:0.5, water:2, grass:2, fighting:2, poison:0.5, ground:2, flying:0.5, steel:2 },
+    ghost:    { normal:0, fighting:0, poison:0.5, bug:0.5, ghost:2, dark:2 },
+    dragon:   { fire:0.5, water:0.5, electric:0.5, grass:0.5, ice:2, fighting:0.5, ground:0.5, rock:0.5, dragon:2, fairy:2 },
+    dark:     { fighting:2, psychic:0, bug:2, ghost:0.5, dark:0.5, fairy:2 },
+    steel:    { normal:0.5, fire:2, water:0.5, electric:0.5, grass:0.5, ice:0.5, fighting:2, poison:0, ground:2, flying:0.5, psychic:0.5, bug:0.5, rock:0.5, dragon:0.5, steel:0.5, fairy:0.5 },
+    fairy:    { fire:0.5, fighting:0.5, poison:2, dragon:0, dark:0.5, steel:2 }
+  };
+
   // ── Favorites ─────────────────────────────────────────────────────────
   function loadFavorites() {
     try {
@@ -179,6 +224,18 @@ $(document).ready(function () {
 
   function fallbackSprite(id) {
     return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + id + '.png';
+  }
+
+  // Animated sprite from Pokemon Showdown (fallback to static if unavailable)
+  function getAnimatedSprite(name) {
+    return 'https://play.pokemonshowdown.com/sprites/ani/' + name + '.gif';
+  }
+
+  // Get primary type color for card background tint
+  function getPrimaryType(p) {
+    if (!p.types || p.types.length === 0) return null;
+    var typeName = p.types[0].type ? p.types[0].type.name : p.types[0];
+    return typeColors[typeName] || null;
   }
 
   function getStat(statsArr, key) {
@@ -335,12 +392,15 @@ $(document).ready(function () {
     var html = '';
     filtered.forEach(function(p) {
       var sprite      = getGridSprite(p.sprites) || fallbackSprite(p.id);
+      var animated    = getAnimatedSprite(p.name);
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
-      html += '<div class="cont-pokemon" data-id="' + p.id + '">' +
+      var typeColor   = getPrimaryType(p);
+      var bgStyle     = typeColor ? ' style="background:linear-gradient(135deg, ' + typeColor + '22 0%, #f5f5f0 60%)"' : '';
+      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
-                '<img class="img-pkmn" data-src="' + sprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
+                '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
                 '<span class="pkmn-name">' + displayName + '</span>' +
                 '<div class="type-badges">' + typeBadges(p.types) + '</div>' +
               '</div>';
@@ -348,13 +408,28 @@ $(document).ready(function () {
     $grid.html(html); // single DOM write
 
     // Attach lazy-load and error handlers
+    // Try animated sprite first, fall back to static sprite, then placeholder
     $grid.find('.img-pkmn').each(function() {
       var imgEl = this;
       var $card = $(this).closest('.cont-pokemon');
       var id    = $card.data('id');
       var name  = $card.find('.pkmn-name').text();
-      var url   = $(this).attr('data-src');
-      imgEl.onerror = makeErrorHandler(imgEl, id, name, url, 1);
+      var staticUrl = $(this).attr('data-src');
+      var animatedUrl = $(this).attr('data-animated');
+
+      // Load animated sprite first
+      imgEl.setAttribute('data-src', animatedUrl || staticUrl);
+      // Fallback chain: try animated, then static, then placeholder
+      imgEl.onerror = function() {
+        var current = imgEl.getAttribute('data-src');
+        if (current === animatedUrl && staticUrl) {
+          imgEl.setAttribute('data-src', staticUrl);
+          imgEl.src = staticUrl;
+        } else {
+          imgEl.src = PLACEHOLDER_SVG;
+          imgEl.onerror = null;
+        }
+      };
       observeImage(imgEl);
     });
 
@@ -588,6 +663,56 @@ $(document).ready(function () {
     }).join(', ');
   }
 
+  // ── Type Matchup Section ───────────────────────────────────────────────
+  function buildMatchupHtml(types) {
+    if (!types || types.length === 0) return '<p class="matchup-empty">No type data.</p>';
+
+    // Get the Pokémon's defending types
+    var defendingTypes = types.map(function(t) {
+      return t.type ? t.type.name : t;
+    });
+
+    // Compute defensive multipliers for all attacking types
+    var multipliers = {};
+    Object.keys(typeColors).forEach(function(attackType) {
+      var mult = 1;
+      defendingTypes.forEach(function(defType) {
+        var chart    = defensiveChart[defType] || {};
+        var thisMult = chart[attackType];
+        if (thisMult !== undefined) mult *= thisMult;
+      });
+      multipliers[attackType] = mult;
+    });
+
+    // Sort: 4x/2x (weaknesses) first, then 0.5x/0.25x (resistances), then 0 (immune)
+    var order = { 4:0, 2:1, 0:2, 1:3, 0.5:4, 0.25:5 };
+    var sortedTypes = Object.keys(multipliers).sort(function(a, b) {
+      var ma = multipliers[a], mb = multipliers[b];
+      var oa = order[ma] !== undefined ? order[ma] : 6;
+      var ob = order[mb] !== undefined ? order[mb] : 6;
+      return oa - ob;
+    });
+
+    var html = '';
+    sortedTypes.forEach(function(typeName) {
+      var mult = multipliers[typeName];
+      if (mult === 1) return; // Skip neutral
+      var color = typeColors[typeName] || '#999';
+      var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
+      var cls = 'matchup-badge';
+      if (mult === 0) cls += ' immune';
+      else if (mult >= 2) cls += ' weak';
+      else cls += ' resist';
+      html += '<span class="' + cls + '" style="background:' + color + '">' +
+                '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
+                '<span class="matchup-mult">' + label + '</span>' +
+              '</span>';
+    });
+
+    if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';
+    return html;
+  }
+
   // ── Detail View ────────────────────────────────────────────────────────
   function renderDetail(id) {
     var p = pokemonCache[id];
@@ -640,8 +765,13 @@ $(document).ready(function () {
           '<img class="specific-info" src="' + PLACEHOLDER_SVG + '" data-src="' + sprite + '" alt="' + displayName + '">' +
           '<button class="fav-star-btn' + favClass + '" data-id="' + id + '" title="Toggle favorite">★</button>' +
           '<button class="shiny-toggle" title="Toggle shiny form">✨ Shiny</button>' +
+          '<button class="cry-btn" title="Play cry">🔊</button>' +
         '</div>' +
         (flavorText ? '<p class="flavor-text">' + flavorText + '</p>' : '') +
+        '<div class="matchup-section">' +
+          '<h3 class="matchup-title">Type Matchups</h3>' +
+          '<div class="matchup-grid">' + buildMatchupHtml(p.types) + '</div>' +
+        '</div>' +
         '<div class="about-section">' +
           '<h3 class="about-title">About</h3>' +
           '<div class="about-grid">' +
@@ -929,6 +1059,42 @@ $(document).ready(function () {
     toggleShiny();
   });
 
+  // ── Click: Cry button ──────────────────────────────────────────────────
+  $(document).on('click', '.cry-btn', function(e) {
+    e.stopPropagation();
+    if (!currentDetailId) return;
+    var p = pokemonCache[currentDetailId];
+    if (!p) return;
+
+    // PokeAPI provides cries in the pokemon response (newer versions)
+    var cryUrl = null;
+    if (p.cries) {
+      cryUrl = p.cries.latest || p.cries.legacy || null;
+    }
+    if (!cryUrl) {
+      // Fallback: use pokemoncries.com
+      cryUrl = 'https://pokemoncries.com/cries/' + currentDetailId + '.mp3';
+    }
+
+    var audio = new Audio(cryUrl);
+    audio.volume = 0.6;
+    audio.play().catch(function() {
+      // Fallback to pokemoncries.com if PokeAPI cry fails
+      var fallback = new Audio('https://pokemoncries.com/cries/' + currentDetailId + '.mp3');
+      fallback.volume = 0.6;
+      fallback.play().catch(function() {
+        // Silently ignore — audio may be blocked by browser
+      });
+    });
+  });
+
+  // ── Click: Random Pokémon ──────────────────────────────────────────────
+  $('#random-btn').on('click', function() {
+    if (allPokemonDetails.length === 0) return;
+    var random = allPokemonDetails[Math.floor(Math.random() * allPokemonDetails.length)];
+    navigateTo(random.id);
+  });
+
   // ── Click: Prev / Next ─────────────────────────────────────────────────
   $('#prev-btn').on('click', function() {
     if (!currentDetailId) return;
@@ -960,6 +1126,40 @@ $(document).ready(function () {
     if (id === currentNum) return;
 
     navigateTo(id);
+  });
+
+  // ── Keyboard Navigation ────────────────────────────────────────────────
+  $(document).on('keydown', function(e) {
+    // Ignore if typing in the search input
+    if ($(e.target).is('#myInput')) return;
+    // Ignore modifier keys
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if ($('#detail-view').hasClass('visible')) {
+      // Detail view navigation
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        $('#prev-btn').trigger('click');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        $('#next-btn').trigger('click');
+      } else if (e.key === 'Escape' || e.key === 'Backspace') {
+        e.preventDefault();
+        showListView();
+        $('.pokedex-screen').scrollTop(0);
+      }
+    } else if ($('#list-view').hasClass('visible')) {
+      // List view: Enter opens first visible card
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var $first = $('#elementos .cont-pokemon').first();
+        if ($first.length) navigateTo($first.data('id'));
+      } else if (e.key === '/') {
+        // Focus search
+        e.preventDefault();
+        $('#myInput').focus();
+      }
+    }
   });
 
 });

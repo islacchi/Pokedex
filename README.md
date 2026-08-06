@@ -5,21 +5,28 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 ## Features
 
 ### List View
-- Responsive card grid showing all 151 Kanto Pokémon (dex number, sprite, name, type badges)
+- Responsive card grid showing all 1025 Pokémon (dex number, sprite, name, type badges)
 - Scroll-aware batch loading — fetches data in small batches as you scroll
 - Image lazy-loading via IntersectionObserver
 - Type badges color-coded to match each of the 18 Pokémon types
+- **Favorite star** on every card — toggle favorites with one click (persisted in localStorage)
+- **No-results state** — friendly message when search/filters match nothing
 
-### Filters
-- **Text search** — filters by name or dex number as you type
+### Filters & Sorting
+- **Text search** — filters by name or dex number as you type (debounced 200ms to prevent lag)
 - **Type filter** — multi-select chip buttons (OR logic), 18 types color-coded
 - **Generation filter** — select Gen 1-9 (uses dex-number range lookup, no extra API calls)
-- All three filters apply simultaneously with AND logic
+- **Favorites filter** — "★ Favs" chip shows only your saved Pokémon
+- **Sorting** — sort by Dex #, A–Z, Base Stat Total, Height, or Weight
+- All filters apply simultaneously with AND logic
 
 ### Detail View
 - Large official artwork sprite
+- **Shiny toggle** — swap between normal and shiny artwork with one click
 - Dex number, capitalized name, and type badges
+- **Favorite star** in the detail view
 - Flavor text description (fetched from `/pokemon-species/{id}`)
+- **About section** — height, weight, abilities (with hidden-ability tag), and base experience
 - **Evolution chain** with branching support:
   - Linear chains (e.g. Charmander → Charmeleon → Charizard)
   - Branching chains (e.g. Eevee → 8 different evolutions as siblings)
@@ -27,6 +34,7 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
   - Currently-viewed Pokémon highlighted in gold
   - Sprite thumbnails for each evolution stage
 - **Base stats** visualized as horizontal bars scaled to max 255 (color-coded per stat)
+- **Prev / Next navigation** — browse Pokémon sequentially without returning to the list
 
 ### Reliability
 - Concurrency-limited API fetching (6 simultaneous requests max)
@@ -35,6 +43,8 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 - 429-aware image backoff (3s for rate-limit, 1.5s for other failures)
 - Broken-image fallback to inline Pokéball SVG placeholder
 - In-memory caching for all API responses — no redundant fetches
+- **localStorage caching** — 7-day TTL with schema versioning (bump `CACHE_VERSION` to invalidate)
+- **Favorites persisted** in localStorage independently of the data cache
 
 ### Design
 - Pokédex device aesthetic: red/dark chrome frame with indicator lights, dark screen area, speaker grill
@@ -53,8 +63,8 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 
 | Endpoint | Purpose |
 |---|---|
-| `/pokedex/1` | Get list of all Kanto Pokémon (entry numbers + species URLs) |
-| `/pokemon/{id}` | Per-Pokémon details: sprites, types, stats |
+| `/pokedex/1` | Get list of all Pokémon (entry numbers + species URLs) |
+| `/pokemon/{id}` | Per-Pokémon details: sprites, types, stats, height, weight, abilities |
 | `/pokemon-species/{id}` | Flavor text, evolution chain URL |
 | Evolution chain URL (from species) | Full evolution tree with conditions |
 
@@ -64,9 +74,9 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 .
 ├── index.html              # Main HTML with filter bars, list/detail containers
 ├── css/
-│   └── main.css            # All styles (532 lines)
+│   └── main.css            # All styles
 ├── js/
-│   └── app.js              # All application logic (743 lines)
+│   └── app.js              # All application logic
 ├── assets/
 │   └── images/             # Static images (logo, favicon)
 └── images/                 # Background images (legacy)
@@ -90,3 +100,5 @@ All external dependencies are loaded via CDN (jQuery, Google Fonts, SweetAlert).
 - Subsequent batches of 30 are prefetched as you scroll toward the end of loaded data
 - Images lazy-load via `IntersectionObserver` (200px margin) — only visible/near-visible cards request sprites
 - All API responses are cached in memory; clicking Back or re-visiting a Pokémon uses cached data instantly
+- Search input is debounced (200ms) so filtering doesn't lag on large datasets
+- Favorites are stored separately in localStorage and never expire

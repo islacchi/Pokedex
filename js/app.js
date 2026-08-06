@@ -7,10 +7,12 @@ $(document).ready(function () {
 
   // Cache TTL: 7 days in ms
   var CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+  var CACHE_VERSION = 2; // bump when cache schema changes
   var CACHE_KEY_POKEMON  = 'pokedex_pokemon_cache';
   var CACHE_KEY_SPECIES  = 'pokedex_species_cache';
   var CACHE_KEY_ENTRIES  = 'pokedex_entries_cache';
   var CACHE_KEY_TS       = 'pokedex_cache_ts';
+  var CACHE_KEY_FAVORITES = 'pokedex_favorites';
 
   // ── Runtime State ──────────────────────────────────────────────────────
   var pokemonCache   = {};   // id -> full pokemon detail
@@ -20,10 +22,15 @@ $(document).ready(function () {
   var allPokemonDetails = [];
   var loadedCount    = 0;
   var isLoadingBatch = false;
+  var favorites      = {};   // id -> true
+  var currentDetailId = null;
+  var currentShiny   = false;
 
   // ── Filter State ───────────────────────────────────────────────────────
   var selectedTypes  = {};
   var selectedGen    = 'all';
+  var favFilterActive = false;
+  var sortMode       = 'id';
 
   // ── Generation Ranges ──────────────────────────────────────────────────
   var genRanges = {
@@ -39,21 +46,49 @@ $(document).ready(function () {
     steel:'#B7B7CE', fairy:'#D685AD'
   };
 
-  // ── LocalStorage Cache ─────────────────────────────────────────────────
-  // Hydrate caches from localStorage on boot; evict if stale.
+  // ── Favorites ─────────────────────────────────────────────────────────
+  function loadFavorites() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY_FAVORITES);
+      favorites = raw ? JSON.parse(raw) : {};
+    } catch(e) { favorites = {}; }
+  }
 
+  function persistFavorites() {
+    try {
+      localStorage.setItem(CACHE_KEY_FAVORITES, JSON.stringify(favorites));
+    } catch(e) { /* quota — ignore */ }
+  }
+
+  function isFavorite(id) { return !!favorites[id]; }
+
+  function toggleFavorite(id) {
+    if (favorites[id]) delete favorites[id];
+    else favorites[id] = true;
+    persistFavorites();
+    // Update UI if list is visible
+    if ($('#list-view').hasClass('visible')) applyFilters();
+    // Update detail star if visible
+    if (currentDetailId === id) {
+      $('#elementos-pkm .fav-star-btn').toggleClass('active', isFavorite(id));
+    }
+  }
+
+  // ── LocalStorage Cache ─────────────────────────────────────────────────
   function tryParse(str) {
     try { return JSON.parse(str); } catch(e) { return null; }
   }
 
   function hydrateCaches() {
     var ts = parseInt(localStorage.getItem(CACHE_KEY_TS) || '0', 10);
-    if (!ts || (Date.now() - ts) > CACHE_TTL) {
-      // Stale — wipe
+    var ver = parseInt(localStorage.getItem('pokedex_cache_ver') || '0', 10);
+    if (!ts || (Date.now() - ts) > CACHE_TTL || ver !== CACHE_VERSION) {
+      // Stale or schema mismatch — wipe
       localStorage.removeItem(CACHE_KEY_POKEMON);
       localStorage.removeItem(CACHE_KEY_SPECIES);
       localStorage.removeItem(CACHE_KEY_ENTRIES);
       localStorage.removeItem(CACHE_KEY_TS);
+      localStorage.removeItem('pokedex_cache_ver');
       return false;
     }
     var p = tryParse(localStorage.getItem(CACHE_KEY_POKEMON));
@@ -71,6 +106,7 @@ $(document).ready(function () {
       localStorage.setItem(CACHE_KEY_SPECIES,  JSON.stringify(speciesCache));
       localStorage.setItem(CACHE_KEY_ENTRIES,  JSON.stringify(pokemonEntries));
       localStorage.setItem(CACHE_KEY_TS, String(Date.now()));
+      localStorage.setItem('pokedex_cache_ver', String(CACHE_VERSION));
     } catch(e) {
       // Quota exceeded — skip silently
     }
@@ -103,7 +139,6 @@ $(document).ready(function () {
   }
 
   // ── AJAX with Jittered Backoff Retry ──────────────────────────────────
-  // FIX #5: jittered backoff prevents thundering-herd re-429s
   function ajaxWithRetry(options, retries, baseDelay) {
     retries   = (retries   === undefined) ? 1    : retries;
     baseDelay = (baseDelay === undefined) ? 2000 : baseDelay;
@@ -125,23 +160,21 @@ $(document).ready(function () {
   }
 
   // ── Sprite Helpers ─────────────────────────────────────────────────────
-  // FIX #1: Grid uses small front_default sprite; detail gets official-artwork.
-
   function getGridSprite(sprites) {
     if (!sprites) return '';
-    // Small pixel sprite — fast, ~4-8 KB vs 200+ KB for official-artwork
     return sprites.front_default || '';
   }
 
-  function getDetailSprite(sprites) {
+  function getDetailSprite(sprites, shiny) {
     if (!sprites) return '';
     var official = sprites.other &&
                    sprites.other['official-artwork'] &&
-                   sprites.other['official-artwork'].front_default;
+                   (shiny ? sprites.other['official-artwork'].front_shiny : sprites.other['official-artwork'].front_default);
     if (official) return official;
-    var home = sprites.other && sprites.other.home && sprites.other.home.front_default;
+    var home = sprites.other && sprites.other.home &&
+               (shiny ? sprites.other.home.front_shiny : sprites.other.home.front_default);
     if (home) return home;
-    return sprites.front_default || '';
+    return shiny ? (sprites.front_shiny || sprites.front_default) : (sprites.front_default || '');
   }
 
   function fallbackSprite(id) {
@@ -151,6 +184,11 @@ $(document).ready(function () {
   function getStat(statsArr, key) {
     var found = statsArr.find(function(s) { return s.stat.name === key; });
     return found ? found.base_stat : 0;
+  }
+
+  function getStatTotal(statsArr) {
+    if (!statsArr) return 0;
+    return statsArr.reduce(function(sum, s) { return sum + (s.base_stat || 0); }, 0);
   }
 
   function capitalize(str) {
@@ -254,21 +292,54 @@ $(document).ready(function () {
       if (range && (p.id < range[0] || p.id > range[1])) return false;
     }
 
+    if (favFilterActive && !isFavorite(p.id)) return false;
+
     return true;
+  }
+
+  // ── Sorting ────────────────────────────────────────────────────────────
+  function sortPokemon(list) {
+    var sorted = list.slice();
+    switch (sortMode) {
+      case 'name':
+        sorted.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        break;
+      case 'stat-total':
+        sorted.sort(function(a, b) { return getStatTotal(b.stats) - getStatTotal(a.stats); });
+        break;
+      case 'height':
+        sorted.sort(function(a, b) { return (b.height || 0) - (a.height || 0); });
+        break;
+      case 'weight':
+        sorted.sort(function(a, b) { return (b.weight || 0) - (a.weight || 0); });
+        break;
+      default: // 'id'
+        sorted.sort(function(a, b) { return a.id - b.id; });
+    }
+    return sorted;
   }
 
   function applyFilters() {
     var $grid    = $('#elementos');
     var filtered = allPokemonDetails.filter(pokemonMatchesFilters);
+    filtered = sortPokemon(filtered);
+
+    // Show/hide no-results message
+    if (filtered.length === 0) {
+      $('#no-results').removeClass('hidden');
+    } else {
+      $('#no-results').addClass('hidden');
+    }
 
     // Build HTML in one string — avoids N separate DOM insertions
     var html = '';
     filtered.forEach(function(p) {
-      // FIX #1: use small grid sprite here
       var sprite      = getGridSprite(p.sprites) || fallbackSprite(p.id);
       var displayName = capitalize(p.name);
+      var favClass    = isFavorite(p.id) ? ' active' : '';
       html += '<div class="cont-pokemon" data-id="' + p.id + '">' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
+                '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
                 '<img class="img-pkmn" data-src="' + sprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
                 '<span class="pkmn-name">' + displayName + '</span>' +
                 '<div class="type-badges">' + typeBadges(p.types) + '</div>' +
@@ -291,7 +362,6 @@ $(document).ready(function () {
   }
 
   // ── Prefetch / Scroll-Aware Loading ────────────────────────────────────
-  // FIX #4: throttled scroll handler — getBoundingClientRect only fires every 100ms
   var prefetchThrottleTimer = null;
 
   function checkPrefetch() {
@@ -332,9 +402,6 @@ $(document).ready(function () {
 
     showLoading();
 
-    // FIX #2: species fetches counted against the same CONCURRENCY pool.
-    // We fetch pokemon first, then species in a second controlled pass —
-    // never firing more than CONCURRENCY total requests at once.
     asyncMapConcurrent(batch, function(entry) {
       var id = entry.entry_number;
       if (pokemonCache[id]) return $.Deferred().resolve(pokemonCache[id]).promise();
@@ -353,7 +420,8 @@ $(document).ready(function () {
         if (data && !allPokemonDetails.some(function(p) { return p.id === id; })) {
           allPokemonDetails.push({
             id: id, name: data.name,
-            sprites: data.sprites, types: data.types, stats: data.stats
+            sprites: data.sprites, types: data.types, stats: data.stats,
+            height: data.height, weight: data.weight
           });
         }
       });
@@ -371,9 +439,6 @@ $(document).ready(function () {
   }
 
   // ── Species: lazy on-demand (not prefetched) ───────────────────────────
-  // FIX #2: species is only fetched when opening the detail view.
-  // This eliminates the 2nd untracked request stream competing for connections.
-
   function fetchSpeciesIfNeeded(id) {
     if (speciesCache[id]) {
       return $.Deferred().resolve(speciesCache[id]).promise();
@@ -501,13 +566,37 @@ $(document).ready(function () {
     return parseInt(parts[parts.length - 1], 10);
   }
 
+  // ── About Section Helpers ──────────────────────────────────────────────
+  function formatHeight(height) {
+    // height is in decimeters; convert to meters
+    if (height === undefined || height === null) return '—';
+    return (height / 10).toFixed(1) + ' m';
+  }
+
+  function formatWeight(weight) {
+    // weight is in hectograms; convert to kg
+    if (weight === undefined || weight === null) return '—';
+    return (weight / 10).toFixed(1) + ' kg';
+  }
+
+  function abilitiesHtml(abilities) {
+    if (!abilities || abilities.length === 0) return '—';
+    return abilities.map(function(a) {
+      var name = capitalize(a.ability.name.replace(/-/g, ' '));
+      if (a.is_hidden) return name + '<span class="ability-hidden">(Hidden)</span>';
+      return name;
+    }).join(', ');
+  }
+
   // ── Detail View ────────────────────────────────────────────────────────
   function renderDetail(id) {
     var p = pokemonCache[id];
     if (!p) return;
 
-    // FIX #1: use high-res official-artwork only in the detail view
-    var sprite      = getDetailSprite(p.sprites) || fallbackSprite(p.id);
+    currentDetailId = id;
+    currentShiny = false;
+
+    var sprite      = getDetailSprite(p.sprites, false) || fallbackSprite(p.id);
     var displayName = capitalize(p.name);
     var species     = speciesCache[id];
     var flavorText  = '';
@@ -538,6 +627,8 @@ $(document).ready(function () {
              '</div>';
     }).join('');
 
+    var favClass = isFavorite(id) ? ' active' : '';
+
     var html =
       '<div class="info-pokemon">' +
         '<div class="detail-header">' +
@@ -547,8 +638,31 @@ $(document).ready(function () {
         '</div>' +
         '<div class="detail-sprite-wrap">' +
           '<img class="specific-info" src="' + PLACEHOLDER_SVG + '" data-src="' + sprite + '" alt="' + displayName + '">' +
+          '<button class="fav-star-btn' + favClass + '" data-id="' + id + '" title="Toggle favorite">★</button>' +
+          '<button class="shiny-toggle" title="Toggle shiny form">✨ Shiny</button>' +
         '</div>' +
         (flavorText ? '<p class="flavor-text">' + flavorText + '</p>' : '') +
+        '<div class="about-section">' +
+          '<h3 class="about-title">About</h3>' +
+          '<div class="about-grid">' +
+            '<div class="about-item">' +
+              '<span class="about-item-label">Height</span>' +
+              '<span class="about-item-value">' + formatHeight(p.height) + '</span>' +
+            '</div>' +
+            '<div class="about-item">' +
+              '<span class="about-item-label">Weight</span>' +
+              '<span class="about-item-value">' + formatWeight(p.weight) + '</span>' +
+            '</div>' +
+            '<div class="about-item">' +
+              '<span class="about-item-label">Abilities</span>' +
+              '<span class="about-item-value">' + abilitiesHtml(p.abilities) + '</span>' +
+            '</div>' +
+            '<div class="about-item">' +
+              '<span class="about-item-label">Base Exp</span>' +
+              '<span class="about-item-value">' + (p.base_experience || '—') + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
         '<div class="evolution-section" id="evo-section">' +
           '<p class="evo-loading" style="color:#888;text-align:center;font-size:10px;font-family:\'Press Start 2P\',monospace;">Loading evolution…</p>' +
         '</div>' +
@@ -568,21 +682,74 @@ $(document).ready(function () {
       observeImage(heroEl);
     }
 
+    // Update prev/next buttons
+    updateNavButtons(id);
+
     // Async render evolution chain into its placeholder
     fetchAndRenderEvolution(id, $('#evo-section'));
   }
 
+  // ── Shiny Toggle ───────────────────────────────────────────────────────
+  function toggleShiny() {
+    if (!currentDetailId) return;
+    var p = pokemonCache[currentDetailId];
+    if (!p) return;
+
+    currentShiny = !currentShiny;
+    var sprite = getDetailSprite(p.sprites, currentShiny) || fallbackSprite(p.id);
+
+    var $img = $('#elementos-pkm .specific-info');
+    if ($img.length) {
+      var imgEl = $img[0];
+      imgEl.src = PLACEHOLDER_SVG;
+      imgEl.setAttribute('data-src', sprite);
+      imgEl.onerror = makeErrorHandler(imgEl, currentDetailId, capitalize(p.name), sprite, 1);
+      observeImage(imgEl);
+    }
+
+    $('.shiny-toggle').toggleClass('active', currentShiny);
+  }
+
+  // ── Prev / Next Navigation ─────────────────────────────────────────────
+  function updateNavButtons(id) {
+    var ids = allPokemonDetails.map(function(p) { return p.id; }).sort(function(a, b) { return a - b; });
+    var idx = ids.indexOf(id);
+    $('#prev-btn').prop('disabled', idx <= 0);
+    $('#next-btn').prop('disabled', idx < 0 || idx >= ids.length - 1);
+  }
+
+  function navigateTo(id) {
+    if (!id) return;
+    showLoading();
+    var fetchPokemon = pokemonCache[id]
+      ? $.Deferred().resolve(pokemonCache[id]).promise()
+      : ajaxWithRetry({ url: 'https://pokeapi.co/api/v2/pokemon/' + id, type: 'GET', dataType: 'json' }, 1)
+          .then(function(data) { pokemonCache[id] = data; return data; });
+
+    fetchPokemon.then(function() {
+      return fetchSpeciesIfNeeded(id);
+    }).then(function() {
+      renderDetail(id);
+      hideLoading();
+      showDetailView();
+      $('.pokedex-screen').scrollTop(0);
+    }).fail(function() {
+      hideLoading();
+      swal('Error!', 'Could not load Pokémon details.', 'error');
+    });
+  }
+
   // ── Navigation ─────────────────────────────────────────────────────────
   function showDetailView() {
-  $('#list-view').removeClass('visible').addClass('hidden');
-  $('#detail-view').removeClass('hidden').addClass('visible');
-  $('.pokedex-screen').addClass('detail-open');      // ← add
+    $('#list-view').removeClass('visible').addClass('hidden');
+    $('#detail-view').removeClass('hidden').addClass('visible');
+    $('.pokedex-screen').addClass('detail-open');
   }
 
   function showListView() {
     $('#detail-view').removeClass('visible').addClass('hidden');
     $('#list-view').removeClass('hidden').addClass('visible');
-    $('.pokedex-screen').removeClass('detail-open');   // ← add
+    $('.pokedex-screen').removeClass('detail-open');
     setTimeout(checkPrefetch, 100);
   }
 
@@ -595,7 +762,8 @@ $(document).ready(function () {
       if (data) {
         allPokemonDetails.push({
           id: id, name: data.name,
-          sprites: data.sprites, types: data.types, stats: data.stats
+          sprites: data.sprites, types: data.types, stats: data.stats,
+          height: data.height, weight: data.weight
         });
       }
     });
@@ -626,7 +794,8 @@ $(document).ready(function () {
         if (data && !allPokemonDetails.some(function(p) { return p.id === id; })) {
           allPokemonDetails.push({
             id: id, name: data.name,
-            sprites: data.sprites, types: data.types, stats: data.stats
+            sprites: data.sprites, types: data.types, stats: data.stats,
+            height: data.height, weight: data.weight
           });
         }
       });
@@ -655,27 +824,38 @@ $(document).ready(function () {
     });
   }
 
+  // ── Debounce Helper ────────────────────────────────────────────────────
+  function debounce(fn, delay) {
+    var timer = null;
+    return function() {
+      var args = arguments;
+      var ctx = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function() {
+        fn.apply(ctx, args);
+      }, delay);
+    };
+  }
+
   // ── Init ───────────────────────────────────────────────────────────────
   initImageObserver();
   initTypeChips();
+  loadFavorites();
 
-  // FIX #3: hydrate from localStorage; skip network on return visits
+  // Hydrate from localStorage; skip network on return visits
   var wasCached = hydrateCaches();
   if (wasCached && pokemonEntries.length > 0) {
     bootstrapFromCache();
     applyFilters();
-    // Still need entries for scroll-based prefetch of remaining pokemon
-    // pokemonEntries is already set from cache
   } else {
     fetchPokedex();
   }
 
   // ── Scroll Listener (throttled) ────────────────────────────────────────
-  // FIX #4: throttled — only fires checkPrefetch once per 100ms
   $('.pokedex-screen').on('scroll', throttledCheckPrefetch);
 
-  // ── Search ─────────────────────────────────────────────────────────────
-  $('#myInput').on('keyup', function() { applyFilters(); });
+  // ── Search (debounced) ─────────────────────────────────────────────────
+  $('#myInput').on('keyup', debounce(function() { applyFilters(); }, 200));
 
   // ── Type Filter Chips ──────────────────────────────────────────────────
   function initTypeChips() {
@@ -708,27 +888,60 @@ $(document).ready(function () {
     applyFilters();
   });
 
+  // ── Favorites Filter ───────────────────────────────────────────────────
+  $('#fav-filter').on('click', function() {
+    favFilterActive = !favFilterActive;
+    $(this).toggleClass('active', favFilterActive);
+    applyFilters();
+  });
+
+  // ── Sort ───────────────────────────────────────────────────────────────
+  $('#sort-select').on('change', function() {
+    sortMode = $(this).val();
+    applyFilters();
+  });
+
   // ── Click: Card → Detail ───────────────────────────────────────────────
-  $(document).on('click', '.cont-pokemon', function() {
+  $(document).on('click', '.cont-pokemon', function(e) {
+    // Don't trigger when clicking the favorite star
+    if ($(e.target).hasClass('fav-card-btn')) return;
     var id = $(this).data('id');
-    showLoading();
+    navigateTo(id);
+  });
 
-    var fetchPokemon = pokemonCache[id]
-      ? $.Deferred().resolve(pokemonCache[id]).promise()
-      : ajaxWithRetry({ url: 'https://pokeapi.co/api/v2/pokemon/' + id, type: 'GET', dataType: 'json' }, 1)
-          .then(function(data) { pokemonCache[id] = data; return data; });
+  // ── Click: Favorite star on card ───────────────────────────────────────
+  $(document).on('click', '.fav-card-btn', function(e) {
+    e.stopPropagation();
+    var id = parseInt($(this).data('id'), 10);
+    toggleFavorite(id);
+  });
 
-    // FIX #2: species fetched here on-demand only — not pre-loaded for all pokemon
-    fetchPokemon.then(function() {
-      return fetchSpeciesIfNeeded(id);
-    }).then(function() {
-      renderDetail(id);
-      hideLoading();
-      showDetailView();
-    }).fail(function() {
-      hideLoading();
-      swal('Error!', 'Could not load Pokémon details.', 'error');
-    });
+  // ── Click: Favorite star in detail ─────────────────────────────────────
+  $(document).on('click', '.fav-star-btn', function(e) {
+    e.stopPropagation();
+    var id = parseInt($(this).data('id'), 10);
+    toggleFavorite(id);
+  });
+
+  // ── Click: Shiny toggle ────────────────────────────────────────────────
+  $(document).on('click', '.shiny-toggle', function(e) {
+    e.stopPropagation();
+    toggleShiny();
+  });
+
+  // ── Click: Prev / Next ─────────────────────────────────────────────────
+  $('#prev-btn').on('click', function() {
+    if (!currentDetailId) return;
+    var ids = allPokemonDetails.map(function(p) { return p.id; }).sort(function(a, b) { return a - b; });
+    var idx = ids.indexOf(currentDetailId);
+    if (idx > 0) navigateTo(ids[idx - 1]);
+  });
+
+  $('#next-btn').on('click', function() {
+    if (!currentDetailId) return;
+    var ids = allPokemonDetails.map(function(p) { return p.id; }).sort(function(a, b) { return a - b; });
+    var idx = ids.indexOf(currentDetailId);
+    if (idx >= 0 && idx < ids.length - 1) navigateTo(ids[idx + 1]);
   });
 
   // ── Click: Back ────────────────────────────────────────────────────────
@@ -737,30 +950,16 @@ $(document).ready(function () {
     $('.pokedex-screen').scrollTop(0);
   });
 
+  // ── Click: Evolution node ──────────────────────────────────────────────
   $(document).on('click', '.evo-node', function () {
-  var id = parseInt($(this).attr('data-id'), 10);
-  if (!id) return;
+    var id = parseInt($(this).attr('data-id'), 10);
+    if (!id) return;
 
-  // Don't re-navigate if already viewing this pokemon
-  var currentNum = parseInt($('.detail-dex-num').text().replace('#', ''), 10);
-  if (id === currentNum) return;
+    // Don't re-navigate if already viewing this pokemon
+    var currentNum = parseInt($('.detail-dex-num').text().replace('#', ''), 10);
+    if (id === currentNum) return;
 
-  showLoading();
-  var fetchPokemon = pokemonCache[id]
-    ? $.Deferred().resolve(pokemonCache[id]).promise()
-    : ajaxWithRetry({ url: 'https://pokeapi.co/api/v2/pokemon/' + id, type: 'GET', dataType: 'json' }, 1)
-        .then(function (data) { pokemonCache[id] = data; return data; });
-
-  fetchPokemon.then(function () {
-    return fetchSpeciesIfNeeded(id);
-  }).then(function () {
-    renderDetail(id);
-    hideLoading();
-    $('.pokedex-screen').scrollTop(0);
-  }).fail(function () {
-    hideLoading();
-    swal('Error!', 'Could not load Pokémon details.', 'error');
+    navigateTo(id);
   });
-});
 
 });

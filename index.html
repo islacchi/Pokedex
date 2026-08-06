@@ -48,11 +48,27 @@
                 <button class="gen-chip" data-gen="7">7</button>
                 <button class="gen-chip" data-gen="8">8</button>
                 <button class="gen-chip" data-gen="9">9</button>
+                <button id="fav-filter" class="fav-chip" title="Show only favorites">★ Favs</button>
+            </div>
+            <div class="filter-bar sort-filter-bar">
+                <span class="filter-label">Sort:</span>
+                <select id="sort-select" class="sort-select" title="Sort results">
+                    <option value="id">Dex #</option>
+                    <option value="name">A–Z</option>
+                    <option value="stat-total">Stat Total</option>
+                    <option value="height">Height</option>
+                    <option value="weight">Weight</option>
+                </select>
             </div>
             <div class="filter-bar type-filter-bar">
                 <span class="filter-label">Type:</span>
                 <div id="type-chips" class="type-chips"></div>
                 <button id="clear-types" class="clear-filters" title="Clear type filter">✕</button>
+            </div>
+            <div id="no-results" class="no-results hidden">
+                <span class="no-results-icon">🔍</span>
+                <p class="no-results-title">No Pokémon found</p>
+                <p class="no-results-hint">Try adjusting your search or filters.</p>
             </div>
             <div id="elementos" class="pokemon-grid"></div>
         </div>
@@ -60,6 +76,10 @@
         <!-- Detail View -->
         <div id="detail-view" class="view hidden">
             <div class="detail-card">
+                <div class="detail-nav-row">
+                    <button id="prev-btn" class="nav-btn" title="Previous Pokémon">◀ Prev</button>
+                    <button id="next-btn" class="nav-btn" title="Next Pokémon">Next ▶</button>
+                </div>
                 <div id="elementos-pkm"></div>
                 <button class="back-btn">← Back</button>
             </div>

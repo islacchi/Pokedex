@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Pokédex</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#cc0000">
+    <meta name="description" content="A comprehensive Pokédex app with search, filters, evolution chains, and more.">
     <link rel="icon" href="./assets/images/icono-pokemon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,8 +25,9 @@
             <span class="light light-green"></span>
         </div>
         <img class="logo-pokemon" src="assets/images/pokemon.png" alt="Pokémon">
-        <input id="myInput" type="text" placeholder="Search by name or #...">
-        <button id="random-btn" class="random-btn" title="Random Pokémon">🎲</button>
+        <input id="myInput" type="text" placeholder="Search by name or #..." aria-label="Search Pokémon">
+        <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light theme" aria-label="Toggle theme">🌙</button>
+        <button id="random-btn" class="random-btn" title="Random Pokémon" aria-label="Random Pokémon">🎲</button>
     </div>
 
     <!-- Loading Indicator -->
@@ -65,13 +69,50 @@
                 <span class="filter-label">Type:</span>
                 <div id="type-chips" class="type-chips"></div>
                 <button id="clear-types" class="clear-filters" title="Clear type filter">✕</button>
+                <button id="compare-toggle" class="compare-toggle" title="Toggle compare mode">⚖️ Compare</button>
+                <button id="damage-toggle" class="damage-toggle" title="Toggle damage calculator">💥 Damage</button>
+            </div>
+            <div id="compare-bar" class="compare-bar hidden">
+                <span class="compare-label">Compare:</span>
+                <span id="compare-count" class="compare-count">0/3</span>
+                <button id="compare-clear" class="compare-clear" title="Clear selection">✕</button>
+            </div>
+            <div id="compare-modal" class="compare-modal hidden">
+                <div class="compare-modal-content">
+                    <button id="compare-close" class="compare-close" title="Close">✕</button>
+                    <h3 class="compare-title">Stat Comparison</h3>
+                    <div id="compare-results" class="compare-results"></div>
+                </div>
+            </div>
+            <div id="damage-calc" class="damage-calc hidden">
+                <h3 class="damage-title">Type Damage Calculator</h3>
+                <div class="damage-controls">
+                    <select id="damage-attack-type" class="damage-select" title="Attacking type">
+                        <option value="">Select attacking type…</option>
+                    </select>
+                    <select id="damage-defend-type" class="damage-select" title="Defending type">
+                        <option value="">Select defending type…</option>
+                    </select>
+                    <button id="damage-calc-btn" class="damage-calc-btn">Calculate</button>
+                </div>
+                <div id="damage-result" class="damage-result hidden"></div>
             </div>
             <div id="no-results" class="no-results hidden">
                 <span class="no-results-icon">🔍</span>
                 <p class="no-results-title">No Pokémon found</p>
                 <p class="no-results-hint">Try adjusting your search or filters.</p>
             </div>
+            <div id="no-favorites" class="no-results hidden">
+                <span class="no-results-icon">★</span>
+                <p class="no-results-title">No favorites yet</p>
+                <p class="no-results-hint">Tap the ★ on any Pokémon to add it to your favorites.</p>
+            </div>
+            <div id="skeleton-grid" class="pokemon-grid skeleton-grid hidden"></div>
             <div id="elementos" class="pokemon-grid"></div>
+            <div id="load-more-indicator" class="load-more hidden">
+                <div class="spinner spinner-sm"></div>
+                <span>Loading more…</span>
+            </div>
         </div>
 
         <!-- Detail View -->
@@ -96,9 +137,22 @@
     </div>
 </div>
 
+<!-- Scroll to Top Button -->
+<button id="scroll-top-btn" class="scroll-top-btn hidden" title="Scroll to top">↑</button>
+
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script src="js/app.js"></script>
+<script>
+  // Register Service Worker for PWA/offline support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').catch(function(err) {
+        console.log('ServiceWorker registration failed:', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>

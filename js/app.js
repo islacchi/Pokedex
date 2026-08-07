@@ -278,6 +278,111 @@ $(document).ready(function () {
   function showLoading() { $('#loading').removeClass('hidden'); }
   function hideLoading()  { $('#loading').addClass('hidden');   }
 
+  // ── Loading Skeletons ────────────────────────────────────────────────
+  function buildSkeletons(count) {
+    var html = '';
+    for (var i = 0; i < count; i++) {
+      html += '<div class="skeleton-card">' +
+                '<div class="skeleton-block skeleton-img"></div>' +
+                '<div class="skeleton-block skeleton-text"></div>' +
+                '<div class="skeleton-block skeleton-badge"></div>' +
+              '</div>';
+    }
+    return html;
+  }
+
+  function showSkeletons(count) {
+    $('#skeleton-grid').html(buildSkeletons(count || 9)).removeClass('hidden');
+    $('#elementos').addClass('hidden');
+  }
+
+  function hideSkeletons() {
+    $('#skeleton-grid').addClass('hidden');
+    $('#elementos').removeClass('hidden');
+  }
+
+  // ── Load More Indicator ──────────────────────────────────────────────
+  function showLoadMore() {
+    $('#load-more-indicator').removeClass('hidden');
+  }
+
+  function hideLoadMore() {
+    $('#load-more-indicator').addClass('hidden');
+  }
+
+  // ── Scroll to Top Button ─────────────────────────────────────────────
+  function initScrollTopButton() {
+    var $screen = $('.pokedex-screen');
+    var $btn = $('#scroll-top-btn');
+
+    $screen.on('scroll', function() {
+      if ($screen.scrollTop() > 300) {
+        $btn.removeClass('hidden');
+      } else {
+        $btn.addClass('hidden');
+      }
+    });
+
+    $btn.on('click', function() {
+      $screen.animate({ scrollTop: 0 }, 300);
+    });
+  }
+
+  // ── Theme Toggle ────────────────────────────────────────────────────
+  var CACHE_KEY_THEME = 'pokedex_theme';
+
+  function loadTheme() {
+    try {
+      var theme = localStorage.getItem(CACHE_KEY_THEME);
+      if (theme === 'light') {
+        $('body').addClass('light-theme');
+        $('#theme-toggle').text('☀️');
+      }
+    } catch(e) { /* ignore */ }
+  }
+
+  function initThemeToggle() {
+    $('#theme-toggle').on('click', function() {
+      var isLight = $('body').hasClass('light-theme');
+      if (isLight) {
+        $('body').removeClass('light-theme');
+        $('#theme-toggle').text('🌙');
+        localStorage.setItem(CACHE_KEY_THEME, 'dark');
+      } else {
+        $('body').addClass('light-theme');
+        $('#theme-toggle').text('☀️');
+        localStorage.setItem(CACHE_KEY_THEME, 'light');
+      }
+    });
+  }
+
+  // ── Shareable Links (URL hash) ──────────────────────────────────────
+  function updateUrlHash(id) {
+    if (history.replaceState) {
+      history.replaceState(null, '', '#/pokemon/' + id);
+    }
+  }
+
+  function clearUrlHash() {
+    if (history.replaceState) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }
+
+  function handleUrlHash() {
+    var hash = window.location.hash;
+    var match = hash.match(/^#\/pokemon\/(\d+)$/);
+    if (match) {
+      var id = parseInt(match[1], 10);
+      if (pokemonCache[id] || allPokemonDetails.some(function(p) { return p.id === id; })) {
+        navigateTo(id);
+      } else {
+        // Fetch the pokemon if not cached
+        navigateTo(id);
+      }
+    }
+  }
+
   // ── Image Lazy Loading (IntersectionObserver) ──────────────────────────
   var imageObserver = null;
 
@@ -376,21 +481,34 @@ $(document).ready(function () {
     return sorted;
   }
 
+  // ── Virtualized Grid ────────────────────────────────────────────────
+  var VIRTUAL_PAGE_SIZE = 60;
+  var virtualPage = 1;
+
   function applyFilters() {
     var $grid    = $('#elementos');
     var filtered = allPokemonDetails.filter(pokemonMatchesFilters);
     filtered = sortPokemon(filtered);
+    var totalFiltered = filtered.length;
+    var visible = filtered.slice(0, VIRTUAL_PAGE_SIZE * virtualPage);
 
     // Show/hide no-results message
     if (filtered.length === 0) {
-      $('#no-results').removeClass('hidden');
+      if (favFilterActive) {
+        $('#no-favorites').removeClass('hidden');
+        $('#no-results').addClass('hidden');
+      } else {
+        $('#no-results').removeClass('hidden');
+        $('#no-favorites').addClass('hidden');
+      }
     } else {
       $('#no-results').addClass('hidden');
+      $('#no-favorites').addClass('hidden');
     }
 
     // Build HTML in one string — avoids N separate DOM insertions
     var html = '';
-    filtered.forEach(function(p) {
+    visible.forEach(function(p) {
       var sprite      = getGridSprite(p.sprites) || fallbackSprite(p.id);
       var animated    = getAnimatedSprite(p.name);
       var displayName = capitalize(p.name);
@@ -432,6 +550,16 @@ $(document).ready(function () {
       };
       observeImage(imgEl);
     });
+
+    // Show "load more" button if there are more filtered results
+    if (totalFiltered > visible.length) {
+      if (!$('#load-more-btn').length) {
+        $grid.after('<button id="load-more-btn" class="load-more-btn">Load More</button>');
+      }
+      $('#load-more-btn').show();
+    } else {
+      $('#load-more-btn').remove();
+    }
 
     setTimeout(checkPrefetch, 50);
   }
@@ -475,7 +603,7 @@ $(document).ready(function () {
 
     if (!batch.length) { isLoadingBatch = false; return; }
 
-    showLoading();
+    showLoadMore();
 
     asyncMapConcurrent(batch, function(entry) {
       var id = entry.entry_number;
@@ -504,12 +632,12 @@ $(document).ready(function () {
       allPokemonDetails.sort(function(a, b) { return a.id - b.id; });
       isLoadingBatch = false;
       applyFilters();
-      hideLoading();
+      hideLoadMore();
       persistCaches(); // persist after every batch
     })
     .catch(function() {
       isLoadingBatch = false;
-      hideLoading();
+      hideLoadMore();
     });
   }
 
@@ -663,6 +791,249 @@ $(document).ready(function () {
     }).join(', ');
   }
 
+  // ── Recent History ────────────────────────────────────────────────────
+  var CACHE_KEY_RECENT = 'pokedex_recent';
+  var recentHistory = [];
+
+  function loadRecent() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY_RECENT);
+      recentHistory = raw ? JSON.parse(raw) : [];
+    } catch(e) { recentHistory = []; }
+  }
+
+  function persistRecent() {
+    try {
+      localStorage.setItem(CACHE_KEY_RECENT, JSON.stringify(recentHistory.slice(0, 8)));
+    } catch(e) { /* ignore */ }
+  }
+
+  function addToRecent(id) {
+    recentHistory = recentHistory.filter(function(x) { return x !== id; });
+    recentHistory.unshift(id);
+    recentHistory = recentHistory.slice(0, 8);
+    persistRecent();
+  }
+
+  function renderRecentSection() {
+    if (!recentHistory.length) return '';
+    var html = '<div class="recent-section">' +
+               '<h3 class="recent-title">Recently Viewed</h3>' +
+               '<div class="recent-grid">';
+    recentHistory.forEach(function(id) {
+      var p = pokemonCache[id];
+      if (!p) return;
+      var sprite = getGridSprite(p.sprites) || fallbackSprite(id);
+      html += '<div class="recent-chip" data-id="' + id + '">' +
+              '<img class="recent-sprite" src="' + sprite + '" alt="' + p.name + '">' +
+              '<span class="recent-name">' + capitalize(p.name) + '</span>' +
+              '</div>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  // ── Forms & Variants ─────────────────────────────────────────────────
+  function renderFormsSection(p) {
+    if (!p.forms || p.forms.length <= 1) return '';
+    var html = '<div class="forms-section">' +
+               '<h3 class="forms-title">Forms</h3>' +
+               '<div class="forms-grid">';
+    p.forms.forEach(function(form) {
+      var formName = form.name.replace(/-/g, ' ').replace(p.name, '').trim() || 'Default';
+      var formSprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png';
+      html += '<div class="form-chip" data-form="' + form.name + '">' +
+              '<img class="form-sprite" src="' + formSprite + '" alt="' + formName + '">' +
+              '<span class="form-name">' + capitalize(formName) + '</span>' +
+              '</div>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  // ── Moves Section ────────────────────────────────────────────────────
+  function renderMovesSection(p) {
+    if (!p.moves || p.moves.length === 0) return '';
+    var moves = p.moves.slice(0, 20);
+    var html = '<div class="moves-section">' +
+               '<h3 class="moves-title">Moves</h3>' +
+               '<div class="moves-filter">' +
+               '<button class="move-filter-chip active" data-filter="all">All</button>' +
+               '<button class="move-filter-chip" data-filter="level-up">Level</button>' +
+               '<button class="move-filter-chip" data-filter="machine">TM</button>' +
+               '<button class="move-filter-chip" data-filter="egg">Egg</button>' +
+               '</div>' +
+               '<div class="moves-list">';
+    moves.forEach(function(move) {
+      var method = move.version_group_details && move.version_group_details[0] ?
+        move.version_group_details[0].move_learn_method.name : 'unknown';
+      var level = move.version_group_details && move.version_group_details[0] ?
+        move.version_group_details[0].level_learned_at : 0;
+      var moveName = move.move.name.replace(/-/g, ' ');
+      var typeColor = '#999';
+      html += '<div class="move-row" data-method="' + method + '">' +
+              '<span class="move-level">' + (method === 'level-up' ? 'Lv.' + level : '—') + '</span>' +
+              '<span class="move-name">' + capitalize(moveName) + '</span>' +
+              '<span class="move-type" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
+              '</div>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  // ── Locations Section ────────────────────────────────────────────────
+  function renderLocationsSection(p) {
+    if (!p.location_area_encounters) return '';
+    var html = '<div class="locations-section">' +
+               '<h3 class="locations-title">Locations</h3>' +
+               '<div class="locations-list">' +
+               '<div class="location-row">' +
+               '<span class="location-icon">📍</span>' +
+               '<span class="location-name">Loading locations…</span>' +
+               '</div></div></div>';
+    return html;
+  }
+
+  function fetchAndRenderLocations(id, $container) {
+    if (!$container.length) return;
+    $.ajax({
+      url: 'https://pokeapi.co/api/v2/pokemon/' + id + '/encounters',
+      type: 'GET', dataType: 'json'
+    }).done(function(data) {
+      if (!data || data.length === 0) {
+        $container.find('.locations-list').html(
+          '<div class="location-row"><span class="location-icon">📍</span>' +
+          '<span class="location-name">No location data available.</span></div>'
+        );
+        return;
+      }
+      var html = '';
+      data.slice(0, 5).forEach(function(loc) {
+        var locName = loc.location_area.name.replace(/-/g, ' ');
+        var versions = loc.version_details.map(function(v) {
+          return v.version.name.replace(/-/g, ' ');
+        }).join(', ');
+        html += '<div class="location-row">' +
+                '<span class="location-icon">📍</span>' +
+                '<span class="location-name">' + capitalize(locName) + '</span>' +
+                '<span class="location-version">' + versions + '</span>' +
+                '</div>';
+      });
+      $container.find('.locations-list').html(html);
+    }).fail(function() {
+      $container.find('.locations-list').html(
+        '<div class="location-row"><span class="location-icon">📍</span>' +
+        '<span class="location-name">Location data unavailable.</span></div>'
+      );
+    });
+  }
+
+  // ── Stats Radar Chart ────────────────────────────────────────────────
+  function buildRadarChart(stats) {
+    var statKeys = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+    var labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+    var values = statKeys.map(function(key) { return getStat(stats, key); });
+    var maxVal = 255;
+    var cx = 110, cy = 110, radius = 80;
+    var angleStep = (2 * Math.PI) / 6;
+
+    function point(i, r) {
+      var angle = -Math.PI / 2 + i * angleStep;
+      return (cx + r * Math.cos(angle)) + ',' + (cy + r * Math.sin(angle));
+    }
+
+    // Grid rings
+    var grid = '';
+    for (var ring = 1; ring <= 4; ring++) {
+      var r = radius * ring / 4;
+      var pts = [];
+      for (var i = 0; i < 6; i++) pts.push(point(i, r));
+      grid += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#2a3a4a" stroke-width="1"/>';
+    }
+
+    // Axis lines
+    var axes = '';
+    for (var i = 0; i < 6; i++) {
+      var p = point(i, radius);
+      axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.split(',')[0] + '" y2="' + p.split(',')[1] + '" stroke="#2a3a4a" stroke-width="1"/>';
+    }
+
+    // Data polygon
+    var dataPts = [];
+    for (var i = 0; i < 6; i++) {
+      var r = radius * Math.min(values[i] / maxVal, 1);
+      dataPts.push(point(i, r));
+    }
+
+    // Labels
+    var labelHtml = '';
+    for (var i = 0; i < 6; i++) {
+      var lp = point(i, radius + 18);
+      var lx = lp.split(',')[0], ly = lp.split(',')[1];
+      labelHtml += '<text x="' + lx + '" y="' + ly + '" class="radar-axis-label" text-anchor="middle">' + labels[i] + '</text>';
+    }
+
+    // Value labels
+    var valueHtml = '';
+    for (var i = 0; i < 6; i++) {
+      var r = radius * Math.min(values[i] / maxVal, 1);
+      var vp = point(i, r - 8);
+      var vx = vp.split(',')[0], vy = vp.split(',')[1];
+      valueHtml += '<text x="' + vx + '" y="' + vy + '" class="radar-value-label" text-anchor="middle">' + values[i] + '</text>';
+    }
+
+    return '<div class="radar-chart">' +
+           '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">' +
+           grid + axes +
+           '<polygon points="' + dataPts.join(' ') + '" fill="rgba(204,0,0,0.3)" stroke="#cc0000" stroke-width="2"/>' +
+           labelHtml + valueHtml +
+           '</svg></div>';
+  }
+
+  // ── Sound Effects ────────────────────────────────────────────────────
+  var soundEnabled = true;
+  var CACHE_KEY_SOUND = 'pokedex_sound';
+
+  function loadSoundPref() {
+    try {
+      soundEnabled = localStorage.getItem(CACHE_KEY_SOUND) !== 'off';
+    } catch(e) { soundEnabled = true; }
+  }
+
+  function playClickSound() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch(e) { /* ignore */ }
+  }
+
+  // ── Confetti ─────────────────────────────────────────────────────────
+  function launchConfetti() {
+    var $container = $('<div class="confetti-container"></div>');
+    $('body').append($container);
+    var colors = ['#cc0000', '#fbc02d', '#4caf50', '#2196F3', '#9c27b0', '#ff9800'];
+    for (var i = 0; i < 50; i++) {
+      var $piece = $('<div class="confetti-piece"></div>');
+      $piece.css({
+        left: Math.random() * 100 + '%',
+        background: colors[Math.floor(Math.random() * colors.length)],
+        animationDuration: (Math.random() * 2 + 1.5) + 's',
+        animationDelay: (Math.random() * 0.5) + 's'
+      });
+      $container.append($piece);
+    }
+    setTimeout(function() { $container.remove(); }, 4000);
+  }
+
   // ── Type Matchup Section ───────────────────────────────────────────────
   function buildMatchupHtml(types) {
     if (!types || types.length === 0) return '<p class="matchup-empty">No type data.</p>';
@@ -754,6 +1125,9 @@ $(document).ready(function () {
 
     var favClass = isFavorite(id) ? ' active' : '';
 
+    // Add to recent history
+    addToRecent(id);
+
     var html =
       '<div class="info-pokemon">' +
         '<div class="detail-header">' +
@@ -793,13 +1167,18 @@ $(document).ready(function () {
             '</div>' +
           '</div>' +
         '</div>' +
+        renderFormsSection(p) +
+        renderMovesSection(p) +
+        renderLocationsSection(p) +
         '<div class="evolution-section" id="evo-section">' +
           '<p class="evo-loading" style="color:#888;text-align:center;font-size:10px;font-family:\'Press Start 2P\',monospace;">Loading evolution…</p>' +
         '</div>' +
         '<div class="stats-section">' +
           '<h3 class="stats-title">Base Stats</h3>' +
+          buildRadarChart(p.stats) +
           '<div class="stats-bars">' + statBars + '</div>' +
         '</div>' +
+        renderRecentSection() +
       '</div>';
 
     $('#elementos-pkm').html(html);
@@ -817,6 +1196,9 @@ $(document).ready(function () {
 
     // Async render evolution chain into its placeholder
     fetchAndRenderEvolution(id, $('#evo-section'));
+
+    // Async render locations
+    fetchAndRenderLocations(id, $('#elementos-pkm .locations-section'));
   }
 
   // ── Shiny Toggle ───────────────────────────────────────────────────────
@@ -862,6 +1244,7 @@ $(document).ready(function () {
       renderDetail(id);
       hideLoading();
       showDetailView();
+      updateUrlHash(id);
       $('.pokedex-screen').scrollTop(0);
     }).fail(function() {
       hideLoading();
@@ -880,6 +1263,7 @@ $(document).ready(function () {
     $('#detail-view').removeClass('visible').addClass('hidden');
     $('#list-view').removeClass('hidden').addClass('visible');
     $('.pokedex-screen').removeClass('detail-open');
+    clearUrlHash();
     setTimeout(checkPrefetch, 100);
   }
 
@@ -904,7 +1288,7 @@ $(document).ready(function () {
   function fetchAllPokemonDetails(entries) {
     loadedCount = 0;
     var initialBatch = entries.slice(0, BATCH_SIZE);
-    showLoading();
+    showSkeletons(9);
 
     asyncMapConcurrent(initialBatch, function(entry) {
       var id = entry.entry_number;
@@ -932,11 +1316,11 @@ $(document).ready(function () {
       loadedCount = initialBatch.length;
       allPokemonDetails.sort(function(a, b) { return a.id - b.id; });
       applyFilters();
-      hideLoading();
+      hideSkeletons();
       persistCaches();
     })
     .catch(function() {
-      hideLoading();
+      hideSkeletons();
       swal('Error!', 'Failed to load Pokémon data. Please try again.', 'error');
     });
   }
@@ -971,6 +1355,12 @@ $(document).ready(function () {
   initImageObserver();
   initTypeChips();
   loadFavorites();
+  loadRecent();
+  loadSoundPref();
+  initScrollTopButton();
+  loadTheme();
+  initThemeToggle();
+  handleUrlHash();
 
   // Hydrate from localStorage; skip network on return visits
   var wasCached = hydrateCaches();
@@ -1031,10 +1421,18 @@ $(document).ready(function () {
     applyFilters();
   });
 
+  // ── Click: Load More (virtualized grid) ───────────────────────────────
+  $(document).on('click', '#load-more-btn', function() {
+    virtualPage++;
+    applyFilters();
+  });
+
   // ── Click: Card → Detail ───────────────────────────────────────────────
   $(document).on('click', '.cont-pokemon', function(e) {
     // Don't trigger when clicking the favorite star
     if ($(e.target).hasClass('fav-card-btn')) return;
+    // Don't navigate when in compare mode
+    if (compareMode) return;
     var id = $(this).data('id');
     navigateTo(id);
   });
@@ -1043,15 +1441,157 @@ $(document).ready(function () {
   $(document).on('click', '.fav-card-btn', function(e) {
     e.stopPropagation();
     var id = parseInt($(this).data('id'), 10);
+    var wasFav = isFavorite(id);
     toggleFavorite(id);
+    if (!wasFav) launchConfetti();
+    playClickSound();
   });
 
   // ── Click: Favorite star in detail ─────────────────────────────────────
   $(document).on('click', '.fav-star-btn', function(e) {
     e.stopPropagation();
     var id = parseInt($(this).data('id'), 10);
+    var wasFav = isFavorite(id);
     toggleFavorite(id);
+    if (!wasFav) launchConfetti();
+    playClickSound();
   });
+
+  // ── Click: Recent chip ─────────────────────────────────────────────────
+  $(document).on('click', '.recent-chip', function() {
+    var id = parseInt($(this).data('id'), 10);
+    if (id) navigateTo(id);
+  });
+
+  // ── Click: Move filter chip ────────────────────────────────────────────
+  $(document).on('click', '.move-filter-chip', function() {
+    var filter = $(this).data('filter');
+    $('.move-filter-chip').removeClass('active');
+    $(this).addClass('active');
+    if (filter === 'all') {
+      $('.move-row').show();
+    } else {
+      $('.move-row').each(function() {
+        $(this).toggle($(this).data('method') === filter);
+      });
+    }
+  });
+
+  // ── Compare Feature ───────────────────────────────────────────────────
+  var compareMode = false;
+  var compareSelection = [];
+
+  function updateCompareUI() {
+    $('#compare-count').text(compareSelection.length + '/3');
+    $('#compare-bar').toggleClass('hidden', !compareMode);
+    $('#compare-toggle').toggleClass('active', compareMode);
+    $('.cont-pokemon').each(function() {
+      var id = parseInt($(this).data('id'), 10);
+      $(this).toggleClass('compare-selected', compareSelection.indexOf(id) > -1);
+    });
+  }
+
+  function showCompareModal() {
+    if (compareSelection.length < 2) {
+      swal('Compare', 'Select at least 2 Pokémon to compare.', 'info');
+      return;
+    }
+    var statKeys = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+    var statLabels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+    var html = '';
+    compareSelection.forEach(function(id) {
+      var p = pokemonCache[id];
+      if (!p) return;
+      var sprite = getGridSprite(p.sprites) || fallbackSprite(id);
+      html += '<div class="compare-card">' +
+              '<div class="compare-pkmn-name">' + capitalize(p.name) + '</div>' +
+              '<img class="compare-pkmn-sprite" src="' + sprite + '" alt="' + p.name + '">';
+      statKeys.forEach(function(key, i) {
+        var val = getStat(p.stats, key);
+        html += '<div class="compare-stat">' +
+                '<span>' + statLabels[i] + '</span>' +
+                '<span class="compare-stat-value">' + val + '</span>' +
+                '</div>';
+      });
+      html += '</div>';
+    });
+    $('#compare-results').html(html);
+    $('#compare-modal').removeClass('hidden');
+  }
+
+  $('#compare-toggle').on('click', function() {
+    compareMode = !compareMode;
+    if (!compareMode) {
+      compareSelection = [];
+    }
+    updateCompareUI();
+  });
+
+  $('#compare-clear').on('click', function() {
+    compareSelection = [];
+    updateCompareUI();
+  });
+
+  $('#compare-close').on('click', function() {
+    $('#compare-modal').addClass('hidden');
+  });
+
+  $(document).on('click', '.cont-pokemon', function(e) {
+    if (!compareMode) return;
+    if ($(e.target).hasClass('fav-card-btn')) return;
+    e.stopPropagation();
+    var id = parseInt($(this).data('id'), 10);
+    var idx = compareSelection.indexOf(id);
+    if (idx > -1) {
+      compareSelection.splice(idx, 1);
+    } else if (compareSelection.length < 3) {
+      compareSelection.push(id);
+    } else {
+      swal('Compare', 'Maximum 3 Pokémon can be compared.', 'info');
+      return;
+    }
+    updateCompareUI();
+    if (compareSelection.length >= 2) {
+      showCompareModal();
+    }
+  });
+
+  // ── Damage Calculator ────────────────────────────────────────────────
+  function initDamageCalculator() {
+    var $attack = $('#damage-attack-type');
+    var $defend = $('#damage-defend-type');
+    Object.keys(typeColors).forEach(function(typeName) {
+      $attack.append('<option value="' + typeName + '">' + capitalize(typeName) + '</option>');
+      $defend.append('<option value="' + typeName + '">' + capitalize(typeName) + '</option>');
+    });
+
+    $('#damage-toggle').on('click', function() {
+      $('#damage-calc').toggleClass('hidden');
+      $(this).toggleClass('active');
+    });
+
+    $('#damage-calc-btn').on('click', function() {
+      var attackType = $attack.val();
+      var defendType = $defend.val();
+      if (!attackType || !defendType) {
+        swal('Damage Calculator', 'Please select both attacking and defending types.', 'info');
+        return;
+      }
+      var mult = 1;
+      var chart = defensiveChart[defendType] || {};
+      if (chart[attackType] !== undefined) mult = chart[attackType];
+      var label = mult === 0 ? '0×' : (mult === 0.25 ? '¼×' : (mult === 0.5 ? '½×' : (mult === 2 ? '2×' : (mult === 4 ? '4×' : '1×'))));
+      var color = mult === 0 ? '#ce93d8' : (mult >= 2 ? '#ff6b6b' : (mult < 1 ? '#69f0ae' : '#aaf0ff'));
+      $('#damage-result')
+        .removeClass('hidden')
+        .html(
+          '<div>' + capitalize(attackType) + ' vs ' + capitalize(defendType) + '</div>' +
+          '<div class="damage-multiplier" style="color:' + color + '">' + label + '</div>'
+        );
+    });
+  }
+
+  initDamageCalculator();
 
   // ── Click: Shiny toggle ────────────────────────────────────────────────
   $(document).on('click', '.shiny-toggle', function(e) {

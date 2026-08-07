@@ -1190,6 +1190,7 @@ body {
 .stats-section {
   border-top: 1px solid #2a3a4a;
   padding-top: 12px;
+  margin-bottom: 12px;
 }
 
 .stats-title {
@@ -2170,8 +2171,31 @@ body.light-theme .stat-value {
 body.light-theme .matchup-title,
 body.light-theme .about-title,
 body.light-theme .evo-title,
-body.light-theme .stats-title {
+body.light-theme .stats-title,
+body.light-theme .moves-title,
+body.light-theme .locations-title,
+body.light-theme .recent-title {
   color: #1a3a4a;
+}
+
+body.light-theme .moves-section,
+body.light-theme .locations-section,
+body.light-theme .recent-section,
+body.light-theme .stats-section {
+  border-top-color: #b0c4d8;
+}
+
+body.light-theme .location-row {
+  background: #f0f0f5;
+  color: #333;
+}
+
+body.light-theme .location-row .location-name {
+  color: #333;
+}
+
+body.light-theme .location-row .location-version {
+  color: #6a8a9a;
 }
 
 body.light-theme .skeleton-card {

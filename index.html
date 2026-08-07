@@ -24,10 +24,6 @@
             <span class="light light-yellow"></span>
             <span class="light light-green"></span>
         </div>
-        <img class="logo-pokemon" src="assets/images/pokemon.png" alt="Pokémon">
-        <input id="myInput" type="text" placeholder="Search by name or #..." aria-label="Search Pokémon">
-        <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light theme" aria-label="Toggle theme">🌙</button>
-        <button id="random-btn" class="random-btn" title="Random Pokémon" aria-label="Random Pokémon">🎲</button>
     </div>
 
     <!-- Loading Indicator -->
@@ -40,6 +36,13 @@
     <div class="pokedex-screen">
         <!-- List View -->
         <div id="list-view" class="view visible">
+            <!-- Search Toolbar -->
+            <div class="filter-bar search-toolbar">
+                <input id="myInput" type="text" placeholder="Search by name or #..." aria-label="Search Pokémon">
+                <button id="random-btn" class="random-btn" title="Random Pokémon" aria-label="Random Pokémon">🎲</button>
+                <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light theme" aria-label="Toggle theme">🌙</button>
+            </div>
+
             <!-- Filter Toolbar -->
             <div class="filter-bar filter-toolbar">
                 <button id="filter-toggle" class="filter-toggle-btn" title="Toggle filters">

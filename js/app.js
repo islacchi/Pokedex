@@ -934,7 +934,7 @@ $(document).ready(function () {
     var labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
     var values = statKeys.map(function(key) { return getStat(stats, key); });
     var maxVal = 255;
-    var cx = 110, cy = 110, radius = 80;
+    var cx = 140, cy = 140, radius = 100;
     var angleStep = (2 * Math.PI) / 6;
 
     function point(i, r) {
@@ -968,7 +968,7 @@ $(document).ready(function () {
     // Labels
     var labelHtml = '';
     for (var i = 0; i < 6; i++) {
-      var lp = point(i, radius + 18);
+      var lp = point(i, radius + 24);
       var lx = lp.split(',')[0], ly = lp.split(',')[1];
       labelHtml += '<text x="' + lx + '" y="' + ly + '" class="radar-axis-label" text-anchor="middle">' + labels[i] + '</text>';
     }
@@ -977,13 +977,13 @@ $(document).ready(function () {
     var valueHtml = '';
     for (var i = 0; i < 6; i++) {
       var r = radius * Math.min(values[i] / maxVal, 1);
-      var vp = point(i, r - 8);
+      var vp = point(i, r - 12);
       var vx = vp.split(',')[0], vy = vp.split(',')[1];
       valueHtml += '<text x="' + vx + '" y="' + vy + '" class="radar-value-label" text-anchor="middle">' + values[i] + '</text>';
     }
 
     return '<div class="radar-chart">' +
-           '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">' +
+           '<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">' +
            grid + axes +
            '<polygon points="' + dataPts.join(' ') + '" fill="rgba(204,0,0,0.3)" stroke="#cc0000" stroke-width="2"/>' +
            labelHtml + valueHtml +

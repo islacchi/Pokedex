@@ -203,6 +203,73 @@ body {
   flex-shrink: 0;
 }
 
+/* Filter Toolbar (always visible) */
+.filter-toolbar {
+  border-bottom: 1px solid #1a3a4a;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
+  gap: 6px;
+}
+
+.filter-toggle-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 4px 10px;
+  border: 1px solid #3a5a6a;
+  border-radius: 12px;
+  background: #162030;
+  color: #8ab;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn:hover {
+  background: #1e3050;
+  color: #bdf;
+}
+
+.filter-toggle-btn.active {
+  background: #cc0000;
+  border-color: #cc0000;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(204,0,0,0.5);
+}
+
+.filter-toggle-chevron {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 9px;
+}
+
+.filter-toggle-btn.active .filter-toggle-chevron {
+  transform: rotate(180deg);
+}
+
+/* Collapsible Filter Panel */
+.filter-panel {
+  background: #0d1b2a;
+  border: 1px solid #1a3a4a;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.filter-panel.hidden {
+  display: none;
+}
+
+.filter-panel .filter-bar {
+  margin-bottom: 6px;
+}
+
+.filter-panel .filter-bar:last-child {
+  margin-bottom: 0;
+}
+
 .generation-filter-bar {
   border-bottom: 1px solid #1a3a4a;
   padding-bottom: 8px;
@@ -1896,7 +1963,8 @@ body.light-theme .gen-chip,
 body.light-theme .fav-chip,
 body.light-theme .sort-select,
 body.light-theme .shiny-toggle,
-body.light-theme .cry-btn {
+body.light-theme .cry-btn,
+body.light-theme .filter-toggle-btn {
   background: #f0f0f5;
   border-color: #b0c4d8;
   color: #1a3a4a;
@@ -1905,9 +1973,21 @@ body.light-theme .cry-btn {
 body.light-theme .gen-chip:hover,
 body.light-theme .fav-chip:hover,
 body.light-theme .sort-select:hover,
-body.light-theme .sort-select:focus {
+body.light-theme .sort-select:focus,
+body.light-theme .filter-toggle-btn:hover {
   background: #fff;
   color: #0a2a3a;
+}
+
+body.light-theme .filter-toggle-btn.active {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: #fff;
+}
+
+body.light-theme .filter-panel {
+  background: #e8f4f8;
+  border-color: #b0c4d8;
 }
 
 body.light-theme .sort-select option {

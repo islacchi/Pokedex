@@ -1394,6 +1394,14 @@ $(document).ready(function () {
     });
   }
 
+  // ── Filter Panel Toggle ─────────────────────────────────────────────
+  $('#filter-toggle').on('click', function() {
+    var $panel = $('#filter-panel');
+    var isHidden = $panel.hasClass('hidden');
+    $panel.toggleClass('hidden', !isHidden);
+    $(this).toggleClass('active', isHidden);
+  });
+
   $('#clear-types').on('click', function() {
     $('.type-chip').removeClass('active');
     selectedTypes = {};

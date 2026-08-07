@@ -40,37 +40,48 @@
     <div class="pokedex-screen">
         <!-- List View -->
         <div id="list-view" class="view visible">
-            <!-- Filter Bars -->
-            <div class="filter-bar generation-filter-bar">
-                <span class="filter-label">Gen:</span>
-                <button class="gen-chip active" data-gen="all">All</button>
-                <button class="gen-chip" data-gen="1">1</button>
-                <button class="gen-chip" data-gen="2">2</button>
-                <button class="gen-chip" data-gen="3">3</button>
-                <button class="gen-chip" data-gen="4">4</button>
-                <button class="gen-chip" data-gen="5">5</button>
-                <button class="gen-chip" data-gen="6">6</button>
-                <button class="gen-chip" data-gen="7">7</button>
-                <button class="gen-chip" data-gen="8">8</button>
-                <button class="gen-chip" data-gen="9">9</button>
+            <!-- Filter Toolbar -->
+            <div class="filter-bar filter-toolbar">
+                <button id="filter-toggle" class="filter-toggle-btn" title="Toggle filters">
+                    <span class="filter-toggle-icon">⚙️</span>
+                    <span class="filter-toggle-label">Filters</span>
+                    <span class="filter-toggle-chevron">▾</span>
+                </button>
                 <button id="fav-filter" class="fav-chip" title="Show only favorites">★ Favs</button>
-            </div>
-            <div class="filter-bar sort-filter-bar">
-                <span class="filter-label">Sort:</span>
-                <select id="sort-select" class="sort-select" title="Sort results">
-                    <option value="id">Dex #</option>
-                    <option value="name">A–Z</option>
-                    <option value="stat-total">Stat Total</option>
-                    <option value="height">Height</option>
-                    <option value="weight">Weight</option>
-                </select>
-            </div>
-            <div class="filter-bar type-filter-bar">
-                <span class="filter-label">Type:</span>
-                <div id="type-chips" class="type-chips"></div>
-                <button id="clear-types" class="clear-filters" title="Clear type filter">✕</button>
                 <button id="compare-toggle" class="compare-toggle" title="Toggle compare mode">⚖️ Compare</button>
                 <button id="damage-toggle" class="damage-toggle" title="Toggle damage calculator">💥 Damage</button>
+            </div>
+
+            <!-- Collapsible Filter Panel -->
+            <div id="filter-panel" class="filter-panel hidden">
+                <div class="filter-bar generation-filter-bar">
+                    <span class="filter-label">Gen:</span>
+                    <button class="gen-chip active" data-gen="all">All</button>
+                    <button class="gen-chip" data-gen="1">1</button>
+                    <button class="gen-chip" data-gen="2">2</button>
+                    <button class="gen-chip" data-gen="3">3</button>
+                    <button class="gen-chip" data-gen="4">4</button>
+                    <button class="gen-chip" data-gen="5">5</button>
+                    <button class="gen-chip" data-gen="6">6</button>
+                    <button class="gen-chip" data-gen="7">7</button>
+                    <button class="gen-chip" data-gen="8">8</button>
+                    <button class="gen-chip" data-gen="9">9</button>
+                </div>
+                <div class="filter-bar sort-filter-bar">
+                    <span class="filter-label">Sort:</span>
+                    <select id="sort-select" class="sort-select" title="Sort results">
+                        <option value="id">Dex #</option>
+                        <option value="name">A–Z</option>
+                        <option value="stat-total">Stat Total</option>
+                        <option value="height">Height</option>
+                        <option value="weight">Weight</option>
+                    </select>
+                </div>
+                <div class="filter-bar type-filter-bar">
+                    <span class="filter-label">Type:</span>
+                    <div id="type-chips" class="type-chips"></div>
+                    <button id="clear-types" class="clear-filters" title="Clear type filter">✕</button>
+                </div>
             </div>
             <div id="compare-bar" class="compare-bar hidden">
                 <span class="compare-label">Compare:</span>

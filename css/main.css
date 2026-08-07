@@ -479,6 +479,10 @@ body {
   gap: 14px;
 }
 
+.skeleton-grid.hidden {
+  display: none;
+}
+
 .skeleton-card {
   background: #f5f5f0;
   border-radius: 10px;
@@ -606,6 +610,10 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
+}
+
+.pokemon-grid.hidden {
+  display: none;
 }
 
 /* ── List Card (cont-pokemon) ─────────────────────────────────────── */

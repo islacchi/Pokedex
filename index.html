@@ -37,10 +37,6 @@
 
     <!-- Screen Area -->
     <div class="pokedex-screen">
-        <!-- Scroll Progress Bar -->
-        <div id="scroll-progress" class="scroll-progress">
-            <div id="scroll-progress-fill" class="scroll-progress-fill"></div>
-        </div>
         <!-- List View -->
         <div id="list-view" class="view visible">
             <!-- Search Toolbar -->
@@ -139,12 +135,18 @@
         <!-- Detail View -->
         <div id="detail-view" class="view hidden">
             <div class="detail-card">
-                <div class="detail-nav-row">
+                <div id="elementos-pkm"></div>
+            </div>
+            <!-- Bottom Action Bar: Progress + Prev/Back/Next -->
+            <div id="detail-bottom-nav" class="detail-bottom-nav">
+                <div id="detail-progress" class="detail-progress">
+                    <div id="detail-progress-fill" class="detail-progress-fill"></div>
+                </div>
+                <div class="detail-nav-buttons">
                     <button id="prev-btn" class="nav-btn" title="Previous Pokémon">◀ Prev</button>
+                    <button class="back-btn">← Back</button>
                     <button id="next-btn" class="nav-btn" title="Next Pokémon">Next ▶</button>
                 </div>
-                <div id="elementos-pkm"></div>
-                <button class="back-btn">← Back</button>
             </div>
         </div>
     </div>

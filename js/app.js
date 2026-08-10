@@ -1286,14 +1286,52 @@ $(document).ready(function () {
     setTimeout(checkPrefetch, 100);
   }
 
-  // ── Scroll Progress Bar ────────────────────────────────────────────────
+  // ── Scroll Progress Bar (bottom action bar) ────────────────────────────
   function updateScrollProgress() {
-    var $bar = $('#scroll-progress-fill');
+    var $bar = $('#detail-progress-fill');
     var $screen = $('.pokedex-screen');
     var st = $screen.scrollTop();
     var total = $screen[0].scrollHeight - $screen[0].clientHeight;
     var pct = total > 0 ? (st / total) * 100 : 0;
     $bar.css('width', pct + '%');
+  }
+
+  // ── Swipe Navigation on Detail View ───────────────────────────────────
+  var swipeStartX = null;
+  var swipeStartY = null;
+
+  function initSwipeNavigation() {
+    var $screen = $('.pokedex-screen');
+
+    $screen.on('touchstart', '.detail-card', function(e) {
+      var touch = e.originalEvent.touches[0];
+      swipeStartX = touch.clientX;
+      swipeStartY = touch.clientY;
+    });
+
+    $screen.on('touchend', '.detail-card', function(e) {
+      if (swipeStartX === null) return;
+      var touch = e.originalEvent.changedTouches[0];
+      var dx = touch.clientX - swipeStartX;
+      var dy = touch.clientY - swipeStartY;
+      var absX = Math.abs(dx);
+      var absY = Math.abs(dy);
+
+      // Reset swipe start
+      swipeStartX = null;
+      swipeStartY = null;
+
+      // Only trigger if horizontal swipe is dominant and passes threshold
+      if (absX > 60 && absX > absY * 1.5) {
+        if (dx < 0) {
+          // Swipe left → next
+          $('#next-btn').trigger('click');
+        } else {
+          // Swipe right → previous
+          $('#prev-btn').trigger('click');
+        }
+      }
+    });
   }
 
   // ── Initial Fetch ──────────────────────────────────────────────────────
@@ -1383,6 +1421,7 @@ $(document).ready(function () {
   // ── Init ───────────────────────────────────────────────────────────────
   initImageObserver();
   initPrefetchObserver();
+  initSwipeNavigation();
   initTypeChips();
   loadFavorites();
   loadRecent();

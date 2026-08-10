@@ -517,31 +517,63 @@ body {
 .view.visible {
   display: block;
 }
+
+/* Detail View Layout */
 #detail-view.visible {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   height: 100%;
 }
 
 .detail-card {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
   max-width: 540px;
   margin: 0 auto;
-  width: 100%;
 }
 
-/* Sticky Detail Nav Row (Prev / Next) */
-.detail-nav-row {
+/* Bottom Action Bar: Progress + Prev/Back/Next */
+.detail-bottom-nav {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0a2a3a 0%, #0d1b2a 100%);
+  border-top: 2px solid #1a3a4a;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+  padding: 0;
+}
+
+.detail-progress {
+  width: 100%;
+  height: 3px;
+  background: #0d1520;
+}
+
+.detail-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #fbc02d, #ff6b6b);
+  transition: width 0.1s ease-out;
+}
+
+.detail-nav-buttons {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: linear-gradient(135deg, #0a2a3a 0%, #0d1b2a 100%);
-  padding: 8px 0;
-  margin: -8px 0 12px;
-  border-bottom: 1px solid #1a3a4a;
+  padding: 10px 12px;
+}
+
+.detail-nav-buttons .nav-btn {
+  flex: 1;
+  text-align: center;
+}
+
+.detail-nav-buttons .back-btn {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
 }
 
 /* ── Loading Skeletons ────────────────────────────────────────────── */
@@ -2107,9 +2139,17 @@ body.light-theme .sort-select option {
   color: #1a3a4a;
 }
 
-body.light-theme .detail-nav-row {
+body.light-theme .detail-bottom-nav {
   background: linear-gradient(135deg, #e8f4f8 0%, #d0e8f0 100%);
-  border-bottom-color: #b0c4d8;
+  border-top-color: #b0c4d8;
+}
+
+body.light-theme .detail-progress {
+  background: #d0e8f0;
+}
+
+body.light-theme .detail-progress-fill {
+  background: linear-gradient(90deg, #fbc02d, #d32f2f);
 }
 
 body.light-theme .info-pokemon {
@@ -2232,34 +2272,12 @@ body.light-theme .speaker-grill span {
   background: #b71c1c;
 }
 
-/* ── Prefetch Sentinels & Progress ──────────────────────────────────── */
+/* ── Prefetch Sentinel ──────────────────────────────────────────────── */
 .prefetch-sentinel {
   width: 100%;
   height: 2px;
   visibility: hidden;
   pointer-events: none;
-}
-
-.scroll-progress {
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  width: 100%;
-  height: 3px;
-  background: transparent;
-  margin-bottom: -3px;
-}
-
-.scroll-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #fbc02d, #ff6b6b);
-  border-radius: 0 2px 2px 0;
-  transition: width 0.1s ease-out;
-}
-
-body.light-theme .scroll-progress-fill {
-  background: linear-gradient(90deg, #fbc02d, #d32f2f);
 }
 
 /* ── Performance: skip rendering off-screen cards ─────────────────── */
@@ -2590,9 +2608,14 @@ body.light-theme .scroll-progress-fill {
   .about-grid {
     grid-template-columns: 1fr;
   }
-  .detail-nav-row .nav-btn {
-    flex: 1;
-    text-align: center;
+  .detail-nav-buttons {
+    gap: 6px;
+    padding: 8px;
+  }
+  .detail-nav-buttons .nav-btn,
+  .detail-nav-buttons .back-btn {
+    font-size: 7px;
+    padding: 8px 6px;
   }
   .specific-info {
     width: 100px;

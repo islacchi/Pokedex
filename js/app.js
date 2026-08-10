@@ -994,9 +994,11 @@ $(document).ready(function () {
 
     // Value labels
     var valueHtml = '';
+    var minLabelR = 28; // never place a value label closer to center than this
     for (var i = 0; i < 6; i++) {
       var r = radius * Math.min(values[i] / maxVal, 1);
-      var vp = point(i, r - 12);
+      var labelR = Math.max(r - 12, minLabelR);
+      var vp = point(i, labelR);
       var vx = vp.split(',')[0], vy = vp.split(',')[1];
       valueHtml += '<text x="' + vx + '" y="' + vy + '" class="radar-value-label" text-anchor="middle">' + values[i] + '</text>';
     }

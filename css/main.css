@@ -529,14 +529,23 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;              /* Firefox */
+  -ms-overflow-style: none;           /* IE/Edge */
   width: 100%;
   max-width: 540px;
   margin: 0 auto;
 }
 
-/* Bottom Action Bar: Progress + Prev/Back/Next */
+.detail-card::-webkit-scrollbar {
+  display: none;                      /* Chrome/Safari/Edge */
+}
+
+/* Bottom Action Bar: Align with card width + Progress + Prev/Back/Next */
 .detail-bottom-nav {
   flex-shrink: 0;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
   background: linear-gradient(135deg, #0a2a3a 0%, #0d1b2a 100%);
   border-top: 2px solid #1a3a4a;
   border-radius: 0 0 8px 8px;
@@ -2376,6 +2385,14 @@ body.light-theme .speaker-grill span {
 
 /* ── Mobile Screens (≤640px) ──────────────────────────────────────── */
 @media (max-width: 640px) {
+  .detail-bottom-nav {
+    max-width: 100%;
+    padding-bottom: calc(0px + env(safe-area-inset-bottom));
+  }
+  .detail-nav-buttons {
+    padding: 8px 10px;
+    gap: 8px;
+  }
   body {
     padding: 0;
     overflow-y: auto;
@@ -2571,6 +2588,20 @@ body.light-theme .speaker-grill span {
 
 /* ── Small Phones (≤400px) ────────────────────────────────────────── */
 @media (max-width: 400px) {
+  .detail-bottom-nav {
+    border-radius: 0;
+  }
+  .detail-nav-buttons .nav-btn,
+  .detail-nav-buttons .back-btn {
+    min-height: 44px;
+  }
+  .detail-nav-buttons .nav-btn{
+    flex: 0 0 38%;
+  }
+  .detail-nav-buttons .back-btn {
+    flex: 1;
+    white-space: nowrap;
+  }
   .pokemon-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
@@ -2642,6 +2673,22 @@ body.light-theme .speaker-grill span {
 
 /* ── Extra Small Phones (≤330px) ──────────────────────────────────── */
 @media (max-width: 330px) {
+  .detail-nav-buttons .nav-btn {
+    font-size: 0;
+  }
+  .detail-nav-buttons .nav-btn::before {
+    font-size: 8px;
+  }
+  .detail-nav-buttons #prev-btn::before {
+    content: '◀';
+  }
+  .detail-nav-buttons #next-btn::before {
+    content: '▶';
+  }
+  .detail-nav-buttons {
+    gap: 4px;
+    padding: 6px;
+  }
   .header-lights .light-blue,
   .header-lights .light-green {
     display: none;
@@ -2682,6 +2729,12 @@ body.light-theme .speaker-grill span {
 
 /* ── Landscape Orientation (Short Screens) ────────────────────────── */
 @media (max-height: 500px) and (orientation: landscape) {
+  .detail-bottom-nav {
+    max-width: 100%;
+  }
+  .detail-nav-buttons {
+    padding: 6px 10px;
+  }
   body {
     padding: 0;
     overflow-y: auto;

@@ -561,26 +561,45 @@ $(document).ready(function () {
       $('#load-more-btn').remove();
     }
 
-    setTimeout(checkPrefetch, 50);
+    // Attach the prefetch sentinel to the grid for infinite scroll
+    setupPrefetchSentinel();
+    updateScrollProgress();
   }
 
-  // ── Prefetch / Scroll-Aware Loading ────────────────────────────────────
+  // ── Prefetch / Infinite Scroll (IntersectionObserver) ──────────────────
+  var prefetchObserver = null;
   var prefetchThrottleTimer = null;
+  var SENTINEL_ID = 'prefetch-sentinel';
 
   function checkPrefetch() {
     if (isLoadingBatch) return;
     if (loadedCount >= pokemonEntries.length) return;
+    if ($('#detail-view').hasClass('visible')) return;
+    fetchNextBatch();
+  }
 
-    var $grid     = $('#elementos');
-    var $lastCard = $grid.find('.cont-pokemon').last();
-    if (!$lastCard.length) return;
+  function initPrefetchObserver() {
+    if (prefetchObserver) return;
+    if (!window.IntersectionObserver) return; // fallback to scroll listener
+    var screenEl = document.querySelector('.pokedex-screen');
+    prefetchObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) checkPrefetch();
+      });
+    }, { root: screenEl, rootMargin: '300px 0px', threshold: 0.01 });
+  }
 
-    var screen    = document.querySelector('.pokedex-screen');
-    var lastRect  = $lastCard[0].getBoundingClientRect();
-    var screenRect = screen.getBoundingClientRect();
-
-    if ((lastRect.bottom - screenRect.bottom) < PRELOAD_MARGIN) {
-      fetchNextBatch();
+  function setupPrefetchSentinel() {
+    var $grid = $('#elementos');
+    var $old = $('#' + SENTINEL_ID);
+    if (prefetchObserver && prefetchObserver.unobserve && $old.length) {
+      prefetchObserver.unobserve($old[0]);
+    }
+    $old.remove();
+    var $sentinel = $('<div id="' + SENTINEL_ID + '" class="prefetch-sentinel"></div>');
+    $grid.append($sentinel);
+    if (prefetchObserver && prefetchObserver.observe) {
+      prefetchObserver.observe($sentinel[0]);
     }
   }
 
@@ -1267,6 +1286,16 @@ $(document).ready(function () {
     setTimeout(checkPrefetch, 100);
   }
 
+  // ── Scroll Progress Bar ────────────────────────────────────────────────
+  function updateScrollProgress() {
+    var $bar = $('#scroll-progress-fill');
+    var $screen = $('.pokedex-screen');
+    var st = $screen.scrollTop();
+    var total = $screen[0].scrollHeight - $screen[0].clientHeight;
+    var pct = total > 0 ? (st / total) * 100 : 0;
+    $bar.css('width', pct + '%');
+  }
+
   // ── Initial Fetch ──────────────────────────────────────────────────────
   function bootstrapFromCache() {
     // Build allPokemonDetails from hydrated pokemonCache
@@ -1353,6 +1382,7 @@ $(document).ready(function () {
 
   // ── Init ───────────────────────────────────────────────────────────────
   initImageObserver();
+  initPrefetchObserver();
   initTypeChips();
   loadFavorites();
   loadRecent();
@@ -1371,8 +1401,13 @@ $(document).ready(function () {
     fetchPokedex();
   }
 
-  // ── Scroll Listener (throttled) ────────────────────────────────────────
-  $('.pokedex-screen').on('scroll', throttledCheckPrefetch);
+  // ── Scroll Listener (fallback + progress) ─────────────────────────────
+  $('.pokedex-screen').on('scroll', function() {
+    // Fallback for browsers without IntersectionObserver
+    if (!window.IntersectionObserver) throttledCheckPrefetch();
+    // Update scroll progress bar
+    updateScrollProgress();
+  });
 
   // ── Search (debounced) ─────────────────────────────────────────────────
   $('#myInput').on('keyup', debounce(function() { applyFilters(); }, 200));

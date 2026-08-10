@@ -833,10 +833,11 @@ body {
 
 .info-pokemon {
   background: #1e2a3a;
-  border-radius: 14px;
+  border-radius: 14px 14px 0 0;
   padding: 20px;
   color: #e0e0e0;
-  box-shadow: 0 0 0 1px #2a3a4a, 0 4px 16px rgba(0,0,0,0.5);
+  border: 1px solid #2a3a4a;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
 }
 
 /* Detail Header */
@@ -1991,7 +1992,7 @@ body.light-theme #myInput:focus {
 }
 
 body.light-theme .pokedex-screen {
-  background: linear-gradient(135deg, #e8f4f8 0%, #d0e8f0 100%);
+  background: linear-gradient(135deg, #cfe8f5 0%, #a8d4ea 100%);
   border-color: #b71c1c;
   box-shadow: inset 0 0 30px rgba(0,0,0,0.15);
 }
@@ -2149,8 +2150,10 @@ body.light-theme .sort-select option {
 }
 
 body.light-theme .detail-bottom-nav {
-  background: linear-gradient(135deg, #e8f4f8 0%, #d0e8f0 100%);
+  background: #fff;
   border-top-color: #b0c4d8;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
 }
 
 body.light-theme .detail-progress {
@@ -2164,7 +2167,8 @@ body.light-theme .detail-progress-fill {
 body.light-theme .info-pokemon {
   background: #fff;
   color: #333;
-  box-shadow: 0 0 0 1px #b0c4d8, 0 4px 16px rgba(0,0,0,0.15);
+  border: 1px solid #7ba8c9;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 body.light-theme .detail-name {

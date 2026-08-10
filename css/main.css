@@ -1,3 +1,38 @@
+/* ── Theme Variables ──────────────────────────────────────────────── */
+:root {
+  --screen-bg-1: #0a2a3a;
+  --screen-bg-2: #0d1b2a;
+  --screen-inset-shadow: rgba(0,0,0,0.7);
+  --frame-border: #5a0000;
+
+  --card-bg: #1e2a3a;
+  --card-border: #2a3a4a;
+  --card-shadow: rgba(0,0,0,0.5);
+
+  --divider-color: #1a3a4a;
+
+  --nav-bg-1: #0a2a3a;
+  --nav-bg-2: #0d1b2a;
+  --nav-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+}
+
+body.light-theme {
+  --screen-bg-1: #cfe8f5;
+  --screen-bg-2: #a8d4ea;
+  --screen-inset-shadow: rgba(0,0,0,0.15);
+  --frame-border: #b71c1c;
+
+  --card-bg: #ffffff;
+  --card-border: #7ba8c9;
+  --card-shadow: rgba(0,0,0,0.15);
+
+  --divider-color: #b0c4d8;
+
+  --nav-bg-1: #ffffff;
+  --nav-bg-2: #ffffff;
+  --nav-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+}
+
 /* ── Reset & Base ─────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -487,14 +522,14 @@ body {
 
 /* ── Screen Area ──────────────────────────────────────────────────── */
 .pokedex-screen {
-  background: linear-gradient(135deg, #0a2a3a 0%, #0d1b2a 100%);
-  border: 4px solid #5a0000;
+  background: linear-gradient(135deg, var(--screen-bg-1) 0%, var(--screen-bg-2) 100%);
+  border: 4px solid var(--frame-border);
   border-radius: 12px;
   padding: 12px;
   overflow-y: auto;
   flex: 1;           /* fills remaining frame height */
   min-height: 0;     /* required for flex children to scroll */
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
+  box-shadow: inset 0 0 30px var(--screen-inset-shadow);
 }
 
 .pokedex-screen::-webkit-scrollbar {
@@ -546,10 +581,10 @@ body {
   width: 100%;
   max-width: 540px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #0a2a3a 0%, #0d1b2a 100%);
-  border-top: 2px solid #1a3a4a;
+  background: linear-gradient(135deg, var(--nav-bg-1) 0%, var(--nav-bg-2) 100%);
+  border-top: 2px solid var(--divider-color);
   border-radius: 0 0 8px 8px;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--nav-shadow);
   padding: 0;
 }
 
@@ -832,12 +867,12 @@ body {
 }
 
 .info-pokemon {
-  background: #1e2a3a;
+  background: var(--card-bg);
   border-radius: 14px 14px 0 0;
   padding: 20px;
   color: #e0e0e0;
-  border: 1px solid #2a3a4a;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 4px 16px var(--card-shadow);
 }
 
 /* Detail Header */
@@ -1991,12 +2026,6 @@ body.light-theme #myInput:focus {
   background: #fff;
 }
 
-body.light-theme .pokedex-screen {
-  background: linear-gradient(135deg, #cfe8f5 0%, #a8d4ea 100%);
-  border-color: #b71c1c;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.15);
-}
-
 body.light-theme .pokedex-screen::-webkit-scrollbar-track {
   background: #d0e8f0;
 }
@@ -2149,13 +2178,6 @@ body.light-theme .sort-select option {
   color: #1a3a4a;
 }
 
-body.light-theme .detail-bottom-nav {
-  background: #fff;
-  border-top-color: #b0c4d8;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-}
-
 body.light-theme .detail-progress {
   background: #d0e8f0;
 }
@@ -2165,10 +2187,7 @@ body.light-theme .detail-progress-fill {
 }
 
 body.light-theme .info-pokemon {
-  background: #fff;
   color: #333;
-  border: 1px solid #7ba8c9;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 body.light-theme .detail-name {

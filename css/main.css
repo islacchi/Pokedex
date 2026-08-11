@@ -9,6 +9,8 @@
   --card-border: #2a3a4a;
   --card-shadow: rgba(0,0,0,0.5);
 
+  --panel-bg: #162030;
+
   --divider-color: #1a3a4a;
 
   --nav-bg-1: #0a2a3a;
@@ -25,6 +27,8 @@ body.light-theme {
   --card-bg: #ffffff;
   --card-border: #7ba8c9;
   --card-shadow: rgba(0,0,0,0.15);
+
+  --panel-bg: #f0f0f5;
 
   --divider-color: #b0c4d8;
 
@@ -1096,7 +1100,7 @@ body {
 }
 
 .about-item {
-  background: #162030;
+  background: var(--panel-bg);
   border-radius: 8px;
   padding: 8px 12px;
   display: flex;
@@ -1156,7 +1160,7 @@ body {
   font-size: 13px;
   line-height: 1.5;
   color: #b0c4d8;
-  background: #162030;
+  background: var(--panel-bg);
   padding: 10px 14px;
   border-radius: 8px;
   margin-bottom: 12px;
@@ -1193,7 +1197,7 @@ body {
   gap: 2px;
   padding: 6px 8px;
   border-radius: 10px;
-  background: #162030;
+  background: var(--panel-bg);
   border: 2px solid transparent;
   transition: border-color 0.2s;
   min-width: 70px;
@@ -1413,7 +1417,7 @@ body {
   gap: 2px;
   padding: 6px 10px;
   border-radius: 10px;
-  background: #162030;
+  background: var(--panel-bg);
   border: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1518,7 +1522,7 @@ body {
   gap: 8px;
   padding: 4px 8px;
   border-radius: 6px;
-  background: #162030;
+  background: var(--panel-bg);
   font-family: 'Roboto', sans-serif;
   font-size: 11px;
   color: #ddd;
@@ -1572,7 +1576,7 @@ body {
   gap: 8px;
   padding: 4px 8px;
   border-radius: 6px;
-  background: #162030;
+  background: var(--panel-bg);
   font-family: 'Roboto', sans-serif;
   font-size: 11px;
   color: #ddd;
@@ -1620,7 +1624,7 @@ body {
   gap: 2px;
   padding: 6px 8px;
   border-radius: 10px;
-  background: #162030;
+  background: var(--panel-bg);
   border: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -2161,12 +2165,7 @@ body.light-theme .moves-list::-webkit-scrollbar-track {
 }
 
 body.light-theme .move-row {
-  background: #f0f0f5;
   color: #333;
-}
-
-body.light-theme .recent-chip {
-  background: #f0f0f5;
 }
 
 body.light-theme .recent-chip .recent-name {
@@ -2198,12 +2197,6 @@ body.light-theme .detail-dex-num {
   color: #888;
 }
 
-body.light-theme .about-item,
-body.light-theme .flavor-text,
-body.light-theme .evo-node {
-  background: #f0f0f5;
-}
-
 body.light-theme .about-item-label,
 body.light-theme .matchup-neutral,
 body.light-theme .matchup-empty,
@@ -2221,6 +2214,10 @@ body.light-theme .flavor-text {
 
 body.light-theme .evo-node .evo-name {
   color: #333;
+}
+
+body.light-theme .evo-node.current {
+  background: #fff8e1;
 }
 
 body.light-theme .evo-arrow .arrow-symbol {
@@ -2269,7 +2266,6 @@ body.light-theme .stats-section {
 }
 
 body.light-theme .location-row {
-  background: #f0f0f5;
   color: #333;
 }
 

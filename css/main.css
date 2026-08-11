@@ -16,6 +16,8 @@
   --nav-bg-1: #0a2a3a;
   --nav-bg-2: #0d1b2a;
   --nav-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+
+  --text-accent-heading: #aaf0ff;
 }
 
 body.light-theme {
@@ -35,6 +37,8 @@ body.light-theme {
   --nav-bg-1: #ffffff;
   --nav-bg-2: #ffffff;
   --nav-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+
+  --text-accent-heading: #1a3a4a;
 }
 
 /* ── Reset & Base ─────────────────────────────────────────────────── */
@@ -200,7 +204,7 @@ body {
   border: none;
   border-radius: 50%;
   background: linear-gradient(180deg, #2a3a4a, #162030);
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   font-size: 16px;
   cursor: pointer;
   box-shadow: 0 2px 0 #0a1a2a, 0 3px 6px rgba(0,0,0,0.3);
@@ -234,7 +238,7 @@ body {
 .filter-label {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   margin-right: 4px;
   flex-shrink: 0;
 }
@@ -460,7 +464,7 @@ body {
   justify-content: center;
   gap: 14px;
   padding: 12px 20px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
   position: absolute;
@@ -514,7 +518,7 @@ body {
 .no-results-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   margin-bottom: 8px;
 }
 
@@ -706,7 +710,7 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 16px 0;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   font-family: 'Press Start 2P', monospace;
   font-size: 9px;
 }
@@ -845,7 +849,7 @@ body {
   border: none;
   border-radius: 20px;
   background: linear-gradient(180deg, #2a3a4a, #1a2a3a);
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
   cursor: pointer;
@@ -991,7 +995,7 @@ body {
   border: 1px solid #3a5a6a;
   border-radius: 12px;
   background: #162030;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   font-size: 14px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1017,7 +1021,7 @@ body {
 .matchup-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1088,7 +1092,7 @@ body {
 .about-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1177,7 +1181,7 @@ body {
 .evo-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1247,7 +1251,7 @@ body {
 .evo-arrow .arrow-symbol {
   font-size: 16px;
   line-height: 1;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
 }
 
 .evo-arrow .evo-condition {
@@ -1280,7 +1284,7 @@ body {
 .stats-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1300,7 +1304,7 @@ body {
 .stat-label {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   width: 72px;
   flex-shrink: 0;
   text-align: right;
@@ -1398,7 +1402,7 @@ body {
 .forms-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1458,7 +1462,7 @@ body {
 .moves-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1559,7 +1563,7 @@ body {
 .locations-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1605,7 +1609,7 @@ body {
 .recent-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1710,7 +1714,7 @@ body {
   margin-bottom: 8px;
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
 }
 
 .compare-bar.hidden {
@@ -1806,7 +1810,7 @@ body {
 .compare-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 16px;
 }
@@ -1901,7 +1905,7 @@ body {
 .damage-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 9px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   text-align: center;
   margin-bottom: 10px;
 }
@@ -1952,7 +1956,7 @@ body {
   text-align: center;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
-  color: #aaf0ff;
+  color: var(--text-accent-heading);
   padding: 10px;
   background: #0d1520;
   border-radius: 8px;
@@ -2034,12 +2038,6 @@ body.light-theme .pokedex-screen::-webkit-scrollbar-track {
   background: #d0e8f0;
 }
 
-body.light-theme .filter-label,
-body.light-theme .load-more,
-body.light-theme .no-results-title {
-  color: #1a3a4a;
-}
-
 body.light-theme .gen-chip,
 body.light-theme .fav-chip,
 body.light-theme .sort-select,
@@ -2080,8 +2078,11 @@ body.light-theme .filter-panel {
 body.light-theme .theme-toggle,
 body.light-theme .random-btn {
   background: linear-gradient(180deg, #f0f0f5, #d0d8e0);
-  color: #1a3a4a;
   box-shadow: 0 2px 0 #b0c4d8, 0 3px 6px rgba(0,0,0,0.15);
+}
+
+body.light-theme .theme-toggle {
+  color: #1a3a4a;
 }
 
 body.light-theme .theme-toggle:hover,
@@ -2092,7 +2093,6 @@ body.light-theme .random-btn:hover {
 
 body.light-theme .compare-bar {
   background: #f0f0f5;
-  color: #1a3a4a;
 }
 
 body.light-theme .compare-label {
@@ -2102,10 +2102,6 @@ body.light-theme .compare-label {
 body.light-theme .compare-modal-content {
   background: #fff;
   box-shadow: 0 0 0 2px #fbc02d, 0 8px 32px rgba(0,0,0,0.3);
-}
-
-body.light-theme .compare-title {
-  color: #1a3a4a;
 }
 
 body.light-theme .compare-card {
@@ -2124,10 +2120,6 @@ body.light-theme .damage-calc {
   background: #f0f0f5;
 }
 
-body.light-theme .damage-title {
-  color: #1a3a4a;
-}
-
 body.light-theme .damage-select {
   background: #fff;
   border-color: #b0c4d8;
@@ -2141,12 +2133,10 @@ body.light-theme .damage-select option {
 
 body.light-theme .damage-result {
   background: #fff;
-  color: #1a3a4a;
 }
 
 body.light-theme .nav-btn {
   background: linear-gradient(180deg, #f0f0f5, #d0d8e0);
-  color: #1a3a4a;
   box-shadow: 0 2px 0 #b0c4d8, 0 3px 6px rgba(0,0,0,0.15);
 }
 
@@ -2220,16 +2210,8 @@ body.light-theme .evo-node.current {
   background: #fff8e1;
 }
 
-body.light-theme .evo-arrow .arrow-symbol {
-  color: #1a3a4a;
-}
-
 body.light-theme .evo-arrow .evo-condition {
   color: #d32f2f;
-}
-
-body.light-theme .stat-label {
-  color: #1a3a4a;
 }
 
 body.light-theme .stat-bar-bg {
@@ -2246,16 +2228,6 @@ body.light-theme .radar-chart .radar-axis-label {
 
 body.light-theme .radar-chart .radar-value-label {
   fill: #333;
-}
-
-body.light-theme .matchup-title,
-body.light-theme .about-title,
-body.light-theme .evo-title,
-body.light-theme .stats-title,
-body.light-theme .moves-title,
-body.light-theme .locations-title,
-body.light-theme .recent-title {
-  color: #1a3a4a;
 }
 
 body.light-theme .moves-section,
@@ -2288,7 +2260,6 @@ body.light-theme .skeleton-block {
 
 body.light-theme .loading {
   background: rgba(240, 240, 245, 0.9);
-  color: #1a3a4a;
 }
 
 body.light-theme .spinner {

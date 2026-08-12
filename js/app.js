@@ -18,6 +18,7 @@ $(document).ready(function () {
   var pokemonCache   = {};   // id -> full pokemon detail
   var speciesCache   = {};   // id -> species data
   var evolutionCache = {};   // chain_url -> chain data
+  var moveCache      = {};   // move_name -> move data (type, power, etc.)
   var pokemonEntries = [];   // raw entries from pokedex endpoint
   var allPokemonDetails = [];
   var loadedCount    = 0;
@@ -919,6 +920,22 @@ $(document).ready(function () {
   }
 
   // ── Moves Section ────────────────────────────────────────────────────
+  function fetchMoveType(moveName) {
+    if (moveCache[moveName]) {
+      return $.Deferred().resolve(moveCache[moveName]).promise();
+    }
+    return ajaxWithRetry({
+      url: 'https://pokeapi.co/api/v2/move/' + moveName,
+      type: 'GET', dataType: 'json'
+    }, 1).then(function(data) {
+      moveCache[moveName] = data;
+      return data;
+    }).fail(function() {
+      moveCache[moveName] = null;
+      return null;
+    });
+  }
+
   function renderMovesSection(p) {
     if (!p.moves || p.moves.length === 0) return '';
     var moves = p.moves.slice(0, 20);
@@ -937,8 +954,9 @@ $(document).ready(function () {
       var level = move.version_group_details && move.version_group_details[0] ?
         move.version_group_details[0].level_learned_at : 0;
       var moveName = move.move.name.replace(/-/g, ' ');
+      var moveKey  = move.move.name;
       var typeColor = '#999';
-      html += '<div class="move-row" data-method="' + method + '">' +
+      html += '<div class="move-row" data-method="' + method + '" data-move-name="' + moveKey + '">' +
               '<span class="move-level">' + (method === 'level-up' ? 'Lv.' + level : '—') + '</span>' +
               '<span class="move-name">' + capitalize(moveName) + '</span>' +
               '<span class="move-type" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
@@ -946,6 +964,27 @@ $(document).ready(function () {
     });
     html += '</div></div>';
     return html;
+  }
+
+  // Lazy-fetch move types and color-code the badges
+  function colorizeMoveTypes($container) {
+    $container.find('.move-row').each(function() {
+      var $row = $(this);
+      var moveKey = $row.attr('data-move-name');
+      if (!moveKey) return;
+      var $badge = $row.find('.move-type');
+      if (moveCache[moveKey] && moveCache[moveKey].type) {
+        var typeName = moveCache[moveKey].type.name;
+        $badge.css('background', typeColors[typeName] || '#999');
+        return;
+      }
+      fetchMoveType(moveKey).then(function(data) {
+        if (data && data.type && data.type.name) {
+          var typeName = data.type.name;
+          $badge.css('background', typeColors[typeName] || '#999');
+        }
+      });
+    });
   }
 
   // ── Locations Section ────────────────────────────────────────────────
@@ -1359,6 +1398,9 @@ $(document).ready(function () {
 
     // Async render locations
     fetchAndRenderLocations(id, $('#elementos-pkm .locations-section'));
+
+    // Lazy-fetch move types and color-code the badges
+    colorizeMoveTypes($('#elementos-pkm .moves-list'));
   }
 
   // ── Shiny Toggle ───────────────────────────────────────────────────────

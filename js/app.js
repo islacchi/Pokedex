@@ -19,6 +19,7 @@ $(document).ready(function () {
   var speciesCache   = {};   // id -> species data
   var evolutionCache = {};   // chain_url -> chain data
   var moveCache      = {};   // move_name -> move data (type, power, etc.)
+  var formCache      = {};   // form_name -> form data (sprites, etc.)
   var pokemonEntries = [];   // raw entries from pokedex endpoint
   var allPokemonDetails = [];
   var loadedCount    = 0;
@@ -902,6 +903,22 @@ $(document).ready(function () {
   }
 
   // ── Forms & Variants ─────────────────────────────────────────────────
+  function fetchFormData(formName) {
+    if (formCache[formName]) {
+      return $.Deferred().resolve(formCache[formName]).promise();
+    }
+    return ajaxWithRetry({
+      url: 'https://pokeapi.co/api/v2/pokemon-form/' + formName,
+      type: 'GET', dataType: 'json'
+    }, 1).then(function(data) {
+      formCache[formName] = data;
+      return data;
+    }).fail(function() {
+      formCache[formName] = null;
+      return null;
+    });
+  }
+
   function renderFormsSection(p) {
     if (!p.forms || p.forms.length <= 1) return '';
     var html = '<div class="forms-section">' +
@@ -909,14 +926,40 @@ $(document).ready(function () {
                '<div class="forms-grid">';
     p.forms.forEach(function(form) {
       var formName = form.name.replace(/-/g, ' ').replace(p.name, '').trim() || 'Default';
+      var formKey  = form.name;
       var formSprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png';
-      html += '<div class="form-chip" data-form="' + form.name + '">' +
-              '<img class="form-sprite" src="' + formSprite + '" alt="' + formName + '">' +
+      html += '<div class="form-chip" data-form="' + formKey + '">' +
+              '<img class="form-sprite" data-src="' + formSprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + formName + '">' +
               '<span class="form-name">' + capitalize(formName) + '</span>' +
               '</div>';
     });
     html += '</div></div>';
     return html;
+  }
+
+  // Lazy-fetch form sprites and update the images
+  function colorizeFormSprites($container) {
+    $container.find('.form-chip').each(function() {
+      var $chip = $(this);
+      var formKey = $chip.attr('data-form');
+      if (!formKey) return;
+      var $img = $chip.find('.form-sprite');
+      if (formCache[formKey] && formCache[formKey].sprites) {
+        var sprite = formCache[formKey].sprites.front_default;
+        if (sprite) {
+          $img.attr('data-src', sprite);
+          $img.attr('src', sprite);
+        }
+        return;
+      }
+      fetchFormData(formKey).then(function(data) {
+        if (data && data.sprites && data.sprites.front_default) {
+          var sprite = data.sprites.front_default;
+          $img.attr('data-src', sprite);
+          $img.attr('src', sprite);
+        }
+      });
+    });
   }
 
   // ── Moves Section ────────────────────────────────────────────────────
@@ -1401,6 +1444,9 @@ $(document).ready(function () {
 
     // Lazy-fetch move types and color-code the badges
     colorizeMoveTypes($('#elementos-pkm .moves-list'));
+
+    // Lazy-fetch form sprites and update the images
+    colorizeFormSprites($('#elementos-pkm .forms-grid'));
   }
 
   // ── Shiny Toggle ───────────────────────────────────────────────────────

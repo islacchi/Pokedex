@@ -1104,6 +1104,65 @@ $(document).ready(function () {
   }
 
   // ── Type Matchup Section ───────────────────────────────────────────────
+  var CACHE_KEY_MATCHUP_MODE = 'pokedex_matchup_mode';
+  var matchupMode = 'defensive'; // 'defensive' | 'offensive'
+
+  function loadMatchupMode() {
+    try {
+      var mode = localStorage.getItem(CACHE_KEY_MATCHUP_MODE);
+      if (mode === 'offensive' || mode === 'defensive') matchupMode = mode;
+    } catch(e) { matchupMode = 'defensive'; }
+  }
+
+  function buildOffensiveMatchupHtml(types) {
+    if (!types || types.length === 0) return '<p class="matchup-empty">No type data.</p>';
+
+    // Get the Pokémon's attacking types
+    var attackingTypes = types.map(function(t) {
+      return t.type ? t.type.name : t;
+    });
+
+    // Compute offensive multipliers for all defending types
+    var multipliers = {};
+    Object.keys(typeColors).forEach(function(defType) {
+      var mult = 1;
+      attackingTypes.forEach(function(atkType) {
+        var chart    = typeChart[atkType] || {};
+        var thisMult = chart[defType];
+        if (thisMult !== undefined) mult *= thisMult;
+      });
+      multipliers[defType] = mult;
+    });
+
+    // Sort: 4x/2x (super effective) first, then 0.5x/0.25x (not very effective), then 0 (no effect)
+    var order = { 4:0, 2:1, 0:2, 1:3, 0.5:4, 0.25:5 };
+    var sortedTypes = Object.keys(multipliers).sort(function(a, b) {
+      var ma = multipliers[a], mb = multipliers[b];
+      var oa = order[ma] !== undefined ? order[ma] : 6;
+      var ob = order[mb] !== undefined ? order[mb] : 6;
+      return oa - ob;
+    });
+
+    var html = '';
+    sortedTypes.forEach(function(typeName) {
+      var mult = multipliers[typeName];
+      if (mult === 1) return; // Skip neutral
+      var color = typeColors[typeName] || '#999';
+      var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
+      var cls = 'matchup-badge';
+      if (mult === 0) cls += ' immune';
+      else if (mult >= 2) cls += ' weak';
+      else cls += ' resist';
+      html += '<span class="' + cls + '" style="background:' + color + '">' +
+                '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
+                '<span class="matchup-mult">' + label + '</span>' +
+              '</span>';
+    });
+
+    if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';
+    return html;
+  }
+
   function buildMatchupHtml(types) {
     if (!types || types.length === 0) return '<p class="matchup-empty">No type data.</p>';
 
@@ -1213,7 +1272,11 @@ $(document).ready(function () {
         (flavorText ? '<p class="flavor-text">' + flavorText + '</p>' : '') +
         '<div class="matchup-section">' +
           '<h3 class="matchup-title">Type Matchups</h3>' +
-          '<div class="matchup-grid">' + buildMatchupHtml(p.types) + '</div>' +
+          '<div class="matchup-toggle-wrap">' +
+            '<button class="matchup-toggle-btn' + (matchupMode === 'defensive' ? ' active' : '') + '" data-mode="defensive">Defensive</button>' +
+            '<button class="matchup-toggle-btn' + (matchupMode === 'offensive' ? ' active' : '') + '" data-mode="offensive">Offensive</button>' +
+          '</div>' +
+          '<div class="matchup-grid">' + (matchupMode === 'offensive' ? buildOffensiveMatchupHtml(p.types) : buildMatchupHtml(p.types)) + '</div>' +
         '</div>' +
         '<div class="about-section">' +
           '<h3 class="about-title">About</h3>' +
@@ -1504,6 +1567,7 @@ $(document).ready(function () {
   loadFavorites();
   loadRecent();
   loadSoundPref();
+  loadMatchupMode();
   initScrollTopButton();
   loadTheme();
   initThemeToggle();
@@ -1752,6 +1816,23 @@ $(document).ready(function () {
   }
 
   initDamageCalculator();
+
+  // ── Click: Matchup mode toggle ─────────────────────────────────────────
+  $(document).on('click', '.matchup-toggle-btn', function(e) {
+    e.stopPropagation();
+    var mode = $(this).data('mode');
+    if (!mode || mode === matchupMode) return;
+    matchupMode = mode;
+    try { localStorage.setItem(CACHE_KEY_MATCHUP_MODE, mode); } catch(err) { /* ignore */ }
+    // Re-render the matchup grid only
+    var $grid = $('.matchup-grid');
+    var p = pokemonCache[currentDetailId];
+    if ($grid.length && p) {
+      $grid.html(mode === 'offensive' ? buildOffensiveMatchupHtml(p.types) : buildMatchupHtml(p.types));
+    }
+    $('.matchup-toggle-btn').removeClass('active');
+    $(this).addClass('active');
+  });
 
   // ── Click: Shiny toggle ────────────────────────────────────────────────
   $(document).on('click', '.shiny-toggle', function(e) {

@@ -810,6 +810,54 @@ $(document).ready(function () {
     }).join(', ');
   }
 
+  // ── Species Info Helpers ──────────────────────────────────────────────
+  function formatCatchRate(rate) {
+    if (rate === undefined || rate === null) return '—';
+    var hard = rate < 45 ? ' <span class="catch-hard">(Hard to catch)</span>' : '';
+    return rate + hard;
+  }
+
+  function formatGenderRatio(genderRate) {
+    if (genderRate === undefined || genderRate === null) return '—';
+    if (genderRate === -1) return '<span class="genderless">Genderless</span>';
+    var femalePct = (genderRate / 8) * 100;
+    var malePct = 100 - femalePct;
+    return '<div class="gender-ratio">' +
+             '<div class="gender-bar">' +
+               '<div class="gender-bar-male" style="width:' + malePct + '%"></div>' +
+               '<div class="gender-bar-female" style="width:' + femalePct + '%"></div>' +
+             '</div>' +
+             '<div class="gender-labels">' +
+               '<span class="gender-male">♂ ' + malePct + '%</span>' +
+               '<span class="gender-female">♀ ' + femalePct + '%</span>' +
+             '</div>' +
+           '</div>';
+  }
+
+  function formatEggGroups(eggGroups) {
+    if (!eggGroups || eggGroups.length === 0) return '—';
+    return eggGroups.map(function(g) {
+      return capitalize(g.name.replace(/-/g, ' '));
+    }).join(', ');
+  }
+
+  function formatGrowthRate(growthRate) {
+    if (!growthRate || !growthRate.name) return '—';
+    return capitalize(growthRate.name.replace(/-/g, ' '));
+  }
+
+  function formatGeneration(gen) {
+    if (!gen || !gen.name) return '—';
+    var num = gen.name.replace('generation-', '');
+    var roman = { 1:'I', 2:'II', 3:'III', 4:'IV', 5:'V', 6:'VI', 7:'VII', 8:'VIII', 9:'IX' };
+    return 'Generation ' + (roman[num] || num.toUpperCase());
+  }
+
+  function formatHabitat(habitat) {
+    if (!habitat || !habitat.name) return '—';
+    return capitalize(habitat.name.replace(/-/g, ' '));
+  }
+
   // ── Recent History ────────────────────────────────────────────────────
   var CACHE_KEY_RECENT = 'pokedex_recent';
   var recentHistory = [];
@@ -1186,6 +1234,34 @@ $(document).ready(function () {
               '<span class="about-item-label">Base Exp</span>' +
               '<span class="about-item-value">' + (p.base_experience || '—') + '</span>' +
             '</div>' +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Catch Rate</span>' +
+              '<span class="about-item-value">' + formatCatchRate(species.capture_rate) + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Base Happiness</span>' +
+              '<span class="about-item-value">' + (species.base_happiness || '—') + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Growth Rate</span>' +
+              '<span class="about-item-value">' + formatGrowthRate(species.growth_rate) + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Egg Groups</span>' +
+              '<span class="about-item-value">' + formatEggGroups(species.egg_groups) + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Gender Ratio</span>' +
+              '<span class="about-item-value">' + formatGenderRatio(species.gender_rate) + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Habitat</span>' +
+              '<span class="about-item-value">' + formatHabitat(species.habitat) + '</span>' +
+            '</div>' : '') +
+            (species ? '<div class="about-item">' +
+              '<span class="about-item-label">Generation</span>' +
+              '<span class="about-item-value">' + formatGeneration(species.generation) + '</span>' +
+            '</div>' : '') +
           '</div>' +
         '</div>' +
         renderFormsSection(p) +

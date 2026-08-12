@@ -1137,6 +1137,61 @@ body {
   margin-left: 4px;
 }
 
+/* Species Info: Catch Rate & Gender Ratio */
+.about-item-value .catch-hard {
+  font-size: 10px;
+  color: #ff6b6b;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.about-item-value .genderless {
+  color: #8ab;
+  font-style: italic;
+}
+
+.gender-ratio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.gender-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #2a3a4a;
+}
+
+.gender-bar-male {
+  background: #4a90d9;
+}
+
+.gender-bar-female {
+  background: #e07a9a;
+}
+
+.gender-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.gender-male {
+  color: #4a90d9;
+}
+
+.gender-female {
+  color: #e07a9a;
+}
+
+body.light-theme .gender-bar {
+  background: #d0d8e0;
+}
+
 /* Favorite Star on List Cards */
 .cont-pokemon .fav-card-btn {
   position: absolute;

@@ -7,7 +7,7 @@ $(document).ready(function () {
 
   // Cache TTL: 7 days in ms
   var CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
-  var CACHE_VERSION = 2; // bump when cache schema changes
+  var CACHE_VERSION = 3; // bump when cache schema changes
   var CACHE_KEY_POKEMON  = 'pokedex_pokemon_cache';
   var CACHE_KEY_SPECIES  = 'pokedex_species_cache';
   var CACHE_KEY_ENTRIES  = 'pokedex_entries_cache';
@@ -40,12 +40,13 @@ $(document).ready(function () {
     5:[494,649], 6:[650,721], 7:[722,809], 8:[810,905], 9:[906,1025]
   };
 
+  // Solid, vivid type colors sized for white badge text (WCAG-checked)
   var typeColors = {
-    normal:'#A8A77A', fire:'#EE8130', water:'#6390F0', electric:'#F7D02C',
-    grass:'#7AC74C', ice:'#96D9D6', fighting:'#C22E28', poison:'#A33EA1',
-    ground:'#E2BF65', flying:'#A98FF3', psychic:'#F95587', bug:'#A6B91A',
-    rock:'#B6A136', ghost:'#735797', dragon:'#6F35FC', dark:'#705746',
-    steel:'#B7B7CE', fairy:'#D685AD'
+    normal:'#8A7048', fire:'#C43E18', water:'#2258B8', electric:'#9C8500',
+    grass:'#3E7D23', ice:'#0D7E9E', fighting:'#96201B', poison:'#7B3390',
+    ground:'#86631C', flying:'#4F52B5', psychic:'#B62B62', bug:'#5F7208',
+    rock:'#78621A', ghost:'#4E3285', dragon:'#3B2FA0', dark:'#4A3B32',
+    steel:'#5B6675', fairy:'#A64477'
   };
 
   // ── Type Matchup Chart (attacking type -> defending type multiplier) ──
@@ -233,7 +234,7 @@ $(document).ready(function () {
     return 'https://play.pokemonshowdown.com/sprites/ani/' + name + '.gif';
   }
 
-  // Get primary type color for card background tint
+  // Get primary type color for the grid card's stripe and hover glow
   function getPrimaryType(p) {
     if (!p.types || p.types.length === 0) return null;
     var typeName = p.types[0].type ? p.types[0].type.name : p.types[0];
@@ -515,8 +516,8 @@ $(document).ready(function () {
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
       var typeColor   = getPrimaryType(p);
-      var bgStyle     = typeColor ? ' style="background:' + typeColor + '33"' : '';
-      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
+      var stripeStyle = typeColor ? ' style="--type-color:' + typeColor + '"' : '';
+      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + stripeStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
                 '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
@@ -564,7 +565,6 @@ $(document).ready(function () {
 
     // Attach the prefetch sentinel to the grid for infinite scroll
     setupPrefetchSentinel();
-    updateScrollProgress();
   }
 
   // ── Prefetch / Infinite Scroll (IntersectionObserver) ──────────────────
@@ -1333,11 +1333,17 @@ $(document).ready(function () {
 
     var favClass = isFavorite(id) ? ' active' : '';
 
+    // Type-colored background for the detail header/profile
+    var detailTypeColor = getPrimaryType(p);
+    var detailBgStyle = detailTypeColor
+      ? ' style="background:' + detailTypeColor + '3D"'   // ~24% alpha — more solid than grid cards
+      : '';
+
     // Add to recent history
     addToRecent(id);
 
     var html =
-      '<div class="info-pokemon">' +
+      '<div class="info-pokemon"' + detailBgStyle + '>' +
         '<div class="detail-header">' +
           '<span class="detail-dex-num">' + dexNum(p.id) + '</span>' +
           '<h2 class="detail-name">' + displayName + '</h2>' +
@@ -1513,14 +1519,6 @@ $(document).ready(function () {
     setTimeout(checkPrefetch, 100);
   }
 
-  // ── Scroll Progress Bar (bottom action bar) ────────────────────────────
-  function updateScrollProgress() {
-    var $bar = $('#detail-progress-fill');
-    var st = $(window).scrollTop();
-    var total = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = total > 0 ? (st / total) * 100 : 0;
-    $bar.css('width', pct + '%');
-  }
 
   // ── Swipe Navigation on Detail View ───────────────────────────────────
   var swipeStartX = null;
@@ -1671,8 +1669,6 @@ $(document).ready(function () {
   $(window).on('scroll', function() {
     // Fallback for browsers without IntersectionObserver
     if (!window.IntersectionObserver) throttledCheckPrefetch();
-    // Update scroll progress bar
-    updateScrollProgress();
   });
 
   // ── Search (debounced) ─────────────────────────────────────────────────

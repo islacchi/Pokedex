@@ -564,7 +564,6 @@ $(document).ready(function () {
 
     // Attach the prefetch sentinel to the grid for infinite scroll
     setupPrefetchSentinel();
-    updateScrollProgress();
   }
 
   // ── Prefetch / Infinite Scroll (IntersectionObserver) ──────────────────
@@ -1333,11 +1332,17 @@ $(document).ready(function () {
 
     var favClass = isFavorite(id) ? ' active' : '';
 
+    // Type-colored background for the detail header/profile
+    var detailTypeColor = getPrimaryType(p);
+    var detailBgStyle = detailTypeColor
+      ? ' style="background:' + detailTypeColor + '3D"'   // ~24% alpha — more solid than grid cards
+      : '';
+
     // Add to recent history
     addToRecent(id);
 
     var html =
-      '<div class="info-pokemon">' +
+      '<div class="info-pokemon"' + detailBgStyle + '>' +
         '<div class="detail-header">' +
           '<span class="detail-dex-num">' + dexNum(p.id) + '</span>' +
           '<h2 class="detail-name">' + displayName + '</h2>' +
@@ -1513,14 +1518,6 @@ $(document).ready(function () {
     setTimeout(checkPrefetch, 100);
   }
 
-  // ── Scroll Progress Bar (bottom action bar) ────────────────────────────
-  function updateScrollProgress() {
-    var $bar = $('#detail-progress-fill');
-    var st = $(window).scrollTop();
-    var total = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = total > 0 ? (st / total) * 100 : 0;
-    $bar.css('width', pct + '%');
-  }
 
   // ── Swipe Navigation on Detail View ───────────────────────────────────
   var swipeStartX = null;
@@ -1671,8 +1668,6 @@ $(document).ready(function () {
   $(window).on('scroll', function() {
     // Fallback for browsers without IntersectionObserver
     if (!window.IntersectionObserver) throttledCheckPrefetch();
-    // Update scroll progress bar
-    updateScrollProgress();
   });
 
   // ── Search (debounced) ─────────────────────────────────────────────────

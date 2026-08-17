@@ -1349,19 +1349,6 @@ body {
   padding: 0;
 }
 
-.detail-progress {
-  width: 100%;
-  height: 3px;
-  background: var(--surface-alt);
-}
-
-.detail-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--accent);
-  transition: width 0.1s ease-out;
-}
-
 .detail-nav-buttons {
   display: flex;
   align-items: center;

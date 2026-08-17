@@ -515,7 +515,7 @@ $(document).ready(function () {
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
       var typeColor   = getPrimaryType(p);
-      var bgStyle     = typeColor ? ' style="background:linear-gradient(135deg, ' + typeColor + '22 0%, #2E3B4E 60%)"' : '';
+      var bgStyle     = typeColor ? ' style="background:' + typeColor + '33"' : '';
       html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +

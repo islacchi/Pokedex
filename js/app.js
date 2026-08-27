@@ -1291,8 +1291,6 @@ $(document).ready(function () {
       return oa - ob;
     });
 
-    var verdictTitles = { weak: 'Deals heavy damage', resist: 'Deals reduced damage', immune: 'No effect' };;
-
     var buckets = { weak: [], resist: [], immune: [] };
     sortedTypes.forEach(function(typeName) {
       var mult = multipliers[typeName];
@@ -1310,7 +1308,7 @@ $(document).ready(function () {
     var html = '';
     ['weak', 'resist', 'immune'].forEach(function(kind) {
       if (!buckets[kind].length) return;
-      html += '<div class="matchup-group-title">' + verdictTitles[kind] + '</div>' + buckets[kind].join('');
+      html += '<div class="matchup-group-gap"></div>' + buckets[kind].join('');
     });
 
     if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';
@@ -1346,8 +1344,6 @@ $(document).ready(function () {
       return oa - ob;
     });
 
-    var verdictTitles = { weak: 'Takes heavy damage', resist: 'Takes reduced damage', immune: 'No effect' };;
-
     var buckets = { weak: [], resist: [], immune: [] };
     sortedTypes.forEach(function(typeName) {
       var mult = multipliers[typeName];
@@ -1365,7 +1361,7 @@ $(document).ready(function () {
     var html = '';
     ['weak', 'resist', 'immune'].forEach(function(kind) {
       if (!buckets[kind].length) return;
-      html += '<div class="matchup-group-title">' + verdictTitles[kind] + '</div>' + buckets[kind].join('');
+      html += '<div class="matchup-group-gap"></div>' + buckets[kind].join('');
     });
 
     if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';

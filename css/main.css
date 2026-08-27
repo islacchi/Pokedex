@@ -1106,7 +1106,7 @@ body {
   display: flex;
   gap: 6px;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 .matchup-toggle-btn {
@@ -1193,16 +1193,9 @@ body.light-theme .matchup-toggle-btn.active {
   padding: 2px 5px;
 }
 
-/* Full-width row headers between badge buckets (wording is mode-aware in JS) */
-.matchup-group-title {
+/* Silent tier divider between matchup groups — wider than the grid's own gap */
+.matchup-group-gap {
   flex: 0 0 100%;
-  margin-top: 6px;
-  font-family: 'Roboto', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--text-control-label);
 }
 
 .matchup-neutral {

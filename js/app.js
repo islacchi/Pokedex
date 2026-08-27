@@ -1501,6 +1501,9 @@ $(document).ready(function () {
     $('#next-btn').prop('disabled', idx < 0 || idx >= ids.length - 1);
   }
 
+  // Remembers list scroll position so returning from detail restores it
+  var savedListScroll = 0;
+
   function navigateTo(id) {
     if (!id) return;
     showLoading();
@@ -1525,6 +1528,10 @@ $(document).ready(function () {
 
   // ── Navigation ─────────────────────────────────────────────────────────
   function showDetailView() {
+    // Snapshot list scroll only on a genuine list→detail transition
+    if ($('#list-view').hasClass('visible')) {
+      savedListScroll = $('.pokedex-screen').scrollTop();
+    }
     $('#list-view').removeClass('visible').addClass('hidden');
     $('#detail-view').removeClass('hidden').addClass('visible');
     $('.pokedex-screen').addClass('detail-open');
@@ -1534,6 +1541,8 @@ $(document).ready(function () {
     $('#detail-view').removeClass('visible').addClass('hidden');
     $('#list-view').removeClass('hidden').addClass('visible');
     $('.pokedex-screen').removeClass('detail-open');
+    // Jump straight back to where the user was in the grid
+    $('.pokedex-screen').scrollTop(savedListScroll);
     clearUrlHash();
     setTimeout(checkPrefetch, 100);
   }
@@ -2005,7 +2014,6 @@ $(document).ready(function () {
   // ── Click: Back ────────────────────────────────────────────────────────
   $(document).on('click', '.back-btn', function() {
     showListView();
-    $('.pokedex-screen').scrollTop(0);
   });
 
   // ── Click: Evolution node ──────────────────────────────────────────────
@@ -2038,7 +2046,6 @@ $(document).ready(function () {
       } else if (e.key === 'Escape' || e.key === 'Backspace') {
         e.preventDefault();
         showListView();
-        $('.pokedex-screen').scrollTop(0);
       }
     } else if ($('#list-view').hasClass('visible')) {
       // List view: Enter opens first visible card

@@ -944,6 +944,9 @@ body {
 }
 .info-pokemon .detail-profile.fill-dark .detail-dex-num { color: rgba(255,255,255,.8); }
 .info-pokemon .detail-profile.fill-dark .fav-star-btn   { color: rgba(255,255,255,.9); }
+/* Light fills (electric, ice, ground...) need dark text instead */
+.info-pokemon .detail-profile.fill-light .detail-name    { color: #1a1a2e; }
+.info-pokemon .detail-profile.fill-light .detail-dex-num { color: rgba(0,0,0,.55); }
 
 .specific-info {
   width: 140px;

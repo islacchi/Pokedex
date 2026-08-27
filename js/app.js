@@ -1860,7 +1860,19 @@ $(document).ready(function () {
       html += '</div>';
     });
     $('#compare-results').html(html);
+    compareTrigger = document.activeElement;
     $('#compare-modal').removeClass('hidden');
+    $('#compare-close').focus();
+  }
+
+  // Restores focus to wherever the modal was opened from
+  var compareTrigger = null;
+  function closeCompareModal() {
+    $('#compare-modal').addClass('hidden');
+    if (compareTrigger) {
+      compareTrigger.focus();
+      compareTrigger = null;
+    }
   }
 
   $('#compare-toggle').on('click', function() {
@@ -1876,8 +1888,11 @@ $(document).ready(function () {
     updateCompareUI();
   });
 
-  $('#compare-close').on('click', function() {
-    $('#compare-modal').addClass('hidden');
+  $('#compare-close').on('click', closeCompareModal);
+
+  // Clicking the dimmed backdrop (outside the panel) also closes
+  $('#compare-modal').on('click', function(e) {
+    if (e.target === this) closeCompareModal();
   });
 
   $(document).on('click', '.cont-pokemon', function(e) {
@@ -2034,6 +2049,15 @@ $(document).ready(function () {
     if ($(e.target).is('#myInput')) return;
     // Ignore modifier keys
     if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // While the compare modal is open, swallow all keys except Escape-to-close
+    if ($('#compare-modal').is(':visible')) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCompareModal();
+      }
+      return;
+    }
 
     if ($('#detail-view').hasClass('visible')) {
       // Detail view navigation

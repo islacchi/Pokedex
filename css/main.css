@@ -854,10 +854,15 @@ body {
   line-height: 1.2;
 }
 
-/* Solid type-fill cards: auto-contrast labels (see getFillTone in app.js) */
+/* Solid type-fill cards: auto-contrast labels (see getFillTone in app.js).
+   White alphas bumped to .95 — at .8 they fell to ~3.9:1 on dragon/ghost.
+   Light fills get deep slate corners: base grays read ~1.2-2.4:1 there. */
 .cont-pokemon.fill-dark .pkmn-name       { color: #fff; }
-.cont-pokemon.fill-dark .dex-num         { color: rgba(255,255,255,.8); }
-.cont-pokemon.fill-dark .fav-card-btn    { color: rgba(255,255,255,.85); }
+.cont-pokemon.fill-dark .dex-num         { color: rgba(255,255,255,.95); }
+.cont-pokemon.fill-dark .fav-card-btn    { color: rgba(255,255,255,.95); }
+
+.cont-pokemon.fill-light .dex-num        { color: rgba(0,0,0,.78); }
+.cont-pokemon.fill-light .fav-card-btn   { color: rgba(0,0,0,.78); }
 
 .type-badges {
   display: flex;
@@ -983,7 +988,7 @@ body {
   margin: -4px -6px 10px;
   padding: 14px 10px;
 }
-.info-pokemon .detail-profile.fill-dark .detail-dex-num { color: rgba(255,255,255,.8); }
+.info-pokemon .detail-profile.fill-dark .detail-dex-num { color: rgba(255,255,255,.95); }
 .info-pokemon .detail-profile.fill-dark .fav-star-btn   { color: rgba(255,255,255,.9); }
 /* Light fills (electric, ice, ground...) need dark text instead */
 .info-pokemon .detail-profile.fill-light .detail-name    { color: #1a1a2e; }

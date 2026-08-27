@@ -832,7 +832,7 @@ body {
   top: 6px;
   left: 8px;
   font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-size: 9px;
   color: #888;
 }
 
@@ -881,6 +881,11 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   letter-spacing: 0.3px;
   line-height: 1.5;
+  /* Lifts the pill off same-hue card/banner fills: faint white veil +
+     dark hairline rim. Painted as box-shadows because the inline
+     `background:` shorthand would override a stylesheet background-image. */
+  box-shadow: inset 0 0 0 999px rgba(255,255,255,.14),
+              0 0 0 1px rgba(0,0,0,.28);
 }
 
 /* Dark ink on bright type backgrounds (tone applied via getFillTone):

@@ -166,7 +166,7 @@ body {
 }
 
 #myInput::placeholder {
-  color: #666;
+  color: #8fa5c0;
   font-size: 9px;
 }
 
@@ -473,8 +473,8 @@ body {
 
 .clear-filters {
   background: none;
-  border: 1px solid #555;
-  color: #999;
+  border: 1px solid #777;
+  color: #b0bfcf;
   border-radius: 50%;
   width: 22px;
   height: 22px;
@@ -989,7 +989,8 @@ body {
   padding: 14px 10px;
 }
 .info-pokemon .detail-profile.fill-dark .detail-dex-num { color: rgba(255,255,255,.95); }
-.info-pokemon .detail-profile.fill-dark .fav-star-btn   { color: rgba(255,255,255,.9); }
+.info-pokemon .detail-profile.fill-dark .fav-star-btn   { color: rgba(255,255,255,.95); }
+.info-pokemon .detail-profile.fill-light .fav-star-btn  { color: rgba(0,0,0,.72); }
 /* Light fills (electric, ice, ground...) need dark text instead */
 .info-pokemon .detail-profile.fill-light .detail-name    { color: #1a1a2e; }
 .info-pokemon .detail-profile.fill-light .detail-dex-num { color: rgba(0,0,0,.55); }
@@ -1010,7 +1011,8 @@ body {
   border: none;
   font-size: 26px;
   cursor: pointer;
-  color: #555;
+  /* slate instead of near-invisible #555 on --card-bg */
+  color: #9db1c7;
   transition: transform 0.15s ease, color 0.15s ease;
   line-height: 1;
   padding: 4px;
@@ -1020,7 +1022,9 @@ body {
   transform: scale(1.2);
 }
 
-.fav-star-btn.active {
+/* Matched-specificity twin so gold beats the fill-tone banner rules above */
+.fav-star-btn.active,
+.info-pokemon .detail-profile .fav-star-btn.active {
   color: #fbc02d;
   text-shadow: 0 0 8px rgba(251,192,45,0.5);
 }
@@ -1935,8 +1939,8 @@ body.light-theme .gender-bar {
 
 .compare-clear {
   background: none;
-  border: 1px solid #555;
-  color: #999;
+  border: 1px solid #777;
+  color: #b0bfcf;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -1993,8 +1997,8 @@ body.light-theme .gender-bar {
   top: 10px;
   right: 10px;
   background: none;
-  border: 1px solid #555;
-  color: #999;
+  border: 1px solid #777;
+  color: #b0bfcf;
   border-radius: 50%;
   width: 28px;
   height: 28px;

@@ -1859,6 +1859,41 @@ body.light-theme .gender-bar {
   color: #1a1a2e;
 }
 
+/* ── Results Meta: live count + active filter chips ───────────────── */
+.results-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: #162030;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--text-accent-heading);
+}
+
+.results-meta.hidden {
+  display: none;
+}
+
+.meta-chip {
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--text-accent-heading);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.meta-chip:hover {
+  background: rgba(255,255,255,0.16);
+}
+
 .compare-bar {
   display: flex;
   align-items: center;
@@ -2247,8 +2282,18 @@ body.light-theme .clear-search:hover {
   box-shadow: 0 4px 0 #b0c4d8, 0 5px 10px rgba(0,0,0,0.2);
 }
 
-body.light-theme .compare-bar {
+body.light-theme .compare-bar,
+body.light-theme .results-meta {
   background: #f0f0f5;
+}
+
+body.light-theme .meta-chip {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.15);
+}
+
+body.light-theme .meta-chip:hover {
+  background: rgba(0,0,0,0.12);
 }
 
 body.light-theme .compare-modal-content {

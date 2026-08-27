@@ -445,6 +445,45 @@ $(document).ready(function () {
     };
   }
 
+  // ── Results Meta Bar ────────────────────────────────────────────────
+  function updateResultsMeta(filteredCount) {
+    var $meta = $('#results-meta');
+    if (!allPokemonDetails.length) {
+      $meta.addClass('hidden');
+      return;
+    }
+
+    var searchVal = $('#myInput').val().trim();
+    var chips = [];
+    if (searchVal) {
+      chips.push({ kind: 'search', label: '"' + searchVal + '"', title: 'Clear search' });
+    }
+    if (selectedGen !== 'all') {
+      chips.push({ kind: 'gen', label: 'Gen ' + selectedGen, title: 'Back to all generations' });
+    }
+    Object.keys(selectedTypes).forEach(function(t) {
+      chips.push({ kind: 'type', value: t, label: capitalize(t), title: 'Remove ' + capitalize(t) + ' filter' });
+    });
+    if (favFilterActive) {
+      chips.push({ kind: 'fav', label: 'Favorites', title: 'Show all Pokémon' });
+    }
+
+    $('#results-count').text(
+      filteredCount < allPokemonDetails.length
+        ? filteredCount + ' of ' + allPokemonDetails.length + ' Pokémon'
+        : allPokemonDetails.length + ' Pokémon'
+    );
+
+    var chipHtml = '';
+    chips.forEach(function(c) {
+      chipHtml += '<button class="meta-chip" data-kind="' + c.kind + '"' +
+        (c.value ? ' data-value="' + c.value + '"' : '') +
+        ' title="' + c.title + '">' + c.label + ' ✕</button>';
+    });
+    $('#active-filters').html(chipHtml);
+    $meta.removeClass('hidden');
+  }
+
   // ── Filtering Logic ────────────────────────────────────────────────────
   function pokemonMatchesFilters(p) {
     var searchVal = $('#myInput').val().toLowerCase().trim();
@@ -521,6 +560,8 @@ $(document).ready(function () {
       $('#no-results').addClass('hidden');
       $('#no-favorites').addClass('hidden');
     }
+
+    updateResultsMeta(totalFiltered);
 
     // Build HTML in one string — avoids N separate DOM insertions
     var html = '';
@@ -1723,6 +1764,23 @@ $(document).ready(function () {
     applyFilters();
   });
   $('#myInput').on('input', syncClearSearch);
+
+  // ── Active-Filter Chips in Results Meta ──────────────────────────────
+  $(document).on('click', '.meta-chip', function() {
+    var kind = $(this).data('kind');
+    if (kind === 'search') {
+      $('#myInput').val('');
+      syncClearSearch();
+      applyFilters();
+    } else if (kind === 'gen') {
+      // Gen chips ignore clicks on the active one; pick "All" instead
+      $('.gen-chip[data-gen="all"]').trigger('click');
+    } else if (kind === 'type') {
+      $('.type-chip[data-type="' + $(this).data('value') + '"]').trigger('click');
+    } else if (kind === 'fav') {
+      $('#fav-filter').trigger('click');
+    }
+  });
 
   // ── Type Filter Chips ──────────────────────────────────────────────────
   function initTypeChips() {

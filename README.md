@@ -83,9 +83,8 @@ A browser-based Pokédex application built with vanilla JavaScript (jQuery), HTM
 │   └── main.css            # All styles
 ├── js/
 │   └── app.js              # All application logic
-├── assets/
-│   └── images/             # Static images (logo, favicon)
-└── images/                 # Background images (legacy)
+└── assets/
+    └── images/             # Static images (logo, favicon)
 ```
 
 ## Getting Started

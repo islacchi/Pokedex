@@ -228,6 +228,38 @@ body {
   box-shadow: 0 1px 0 #0a1a2a;
 }
 
+/* ── Clear Search ✕ (visible only when input has text) ────────────── */
+.clear-search {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #2a3a4a, #162030);
+  color: var(--text-accent-heading);
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #0a1a2a, 0 3px 6px rgba(0,0,0,0.3);
+  transition: transform 0.1s, box-shadow 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 #0a1a2a, 0 5px 10px rgba(0,0,0,0.4);
+}
+
+.clear-search:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #0a1a2a;
+}
+
+.clear-search.hidden {
+  display: none;
+}
+
 /* ── Filter Bars ──────────────────────────────────────────────────── */
 .filter-bar {
   display: flex;
@@ -2198,7 +2230,8 @@ body.light-theme .filter-panel {
 }
 
 body.light-theme .theme-toggle,
-body.light-theme .random-btn {
+body.light-theme .random-btn,
+body.light-theme .clear-search {
   background: linear-gradient(180deg, #f0f0f5, #d0d8e0);
   box-shadow: 0 2px 0 #b0c4d8, 0 3px 6px rgba(0,0,0,0.15);
 }
@@ -2208,7 +2241,8 @@ body.light-theme .theme-toggle {
 }
 
 body.light-theme .theme-toggle:hover,
-body.light-theme .random-btn:hover {
+body.light-theme .random-btn:hover,
+body.light-theme .clear-search:hover {
   background: linear-gradient(180deg, #fff, #e0e8f0);
   box-shadow: 0 4px 0 #b0c4d8, 0 5px 10px rgba(0,0,0,0.2);
 }

@@ -1713,6 +1713,17 @@ $(document).ready(function () {
   // ── Search (debounced) ─────────────────────────────────────────────────
   $('#myInput').on('keyup', debounce(function() { applyFilters(); }, 200));
 
+  // ── Clear Search ✕ ─────────────────────────────────────────────────────
+  function syncClearSearch() {
+    $('#clear-search').toggleClass('hidden', $('#myInput').val().length === 0);
+  }
+  $('#clear-search').on('click', function() {
+    $('#myInput').val('').focus();
+    syncClearSearch();
+    applyFilters();
+  });
+  $('#myInput').on('input', syncClearSearch);
+
   // ── Type Filter Chips ──────────────────────────────────────────────────
   function initTypeChips() {
     var $container = $('#type-chips');

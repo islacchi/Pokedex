@@ -1416,19 +1416,23 @@ $(document).ready(function () {
     var pType = getPrimaryType(p);
     var profileOpen = '<div class="detail-profile' +
       (pType ? ' fill-' + getFillTone(pType) : '') + '"' +
-      (pType ? ' style="background:' + pType + '"' : '') + '>';
+      (pType ? ' style="background:' + pType + '99"' : '') + '>';
 
     var html =
       '<div class="info-pokemon">' +
         profileOpen +
         '<div class="detail-header">' +
-          '<span class="detail-dex-num">' + dexNum(p.id) + '</span>' +
-          '<h2 class="detail-name">' + displayName + '</h2>' +
-          '<div class="detail-types">' + typeBadges(p.types) + '</div>' +
+          '<div class="header-left">' +
+            '<span class="detail-dex-num">' + dexNum(p.id) + '</span>' +
+            '<h2 class="detail-name">' + displayName + '</h2>' +
+          '</div>' +
+          '<div class="header-right">' +
+            '<div class="detail-types">' + typeBadges(p.types) + '</div>' +
+            '<button class="fav-star-btn' + favClass + '" data-id="' + id + '" title="Toggle favorite">★</button>' +
+          '</div>' +
         '</div>' +
         '<div class="detail-sprite-wrap">' +
           '<img class="specific-info" src="' + PLACEHOLDER_SVG + '" data-src="' + sprite + '" alt="' + displayName + '">' +
-          '<button class="fav-star-btn' + favClass + '" data-id="' + id + '" title="Toggle favorite">★</button>' +
           '<button class="shiny-toggle" title="Toggle shiny form">✨ Shiny</button>' +
           '<button class="cry-btn" title="Play cry">🔊</button>' +
         '</div>' +

@@ -946,10 +946,31 @@ body {
 /* Detail Header */
 .detail-header {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* Star now lives in the header rail — neutralize its old sprite-overlay
+   positioning; specificity above base rule wins regardless of order */
+.info-pokemon .header-right .fav-star-btn {
+  position: static;
+  padding: 0;
 }
 
 .detail-dex-num {
@@ -969,7 +990,8 @@ body {
 .detail-types {
   display: flex;
   gap: 6px;
-  margin-left: auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .detail-types .type-badge {
@@ -2701,12 +2723,10 @@ body.light-theme .speaker-grill span {
     padding: 4px 6px;
   }
   .detail-header {
+    /* stack the two rails, but let each keep its own edge alignment */
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .detail-types {
-    margin-left: 0;
+    align-items: stretch;
+    gap: 6px;
   }
   .detail-name {
     font-size: 20px;

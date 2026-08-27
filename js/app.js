@@ -62,6 +62,16 @@ $(document).ready(function () {
     return lum > 0.213 ? 'light' : 'dark';
   }
 
+  // Class suffix telling CSS a light background needs dark ink
+  function badgeToneClass(hex) {
+    return getFillTone(hex) === 'light' ? ' fill-light' : '';
+  }
+
+  // One-stop styling for lazily colored badges
+  function applyBadgeTone($el, hex) {
+    $el.css('background', hex).toggleClass('fill-light', getFillTone(hex) === 'light');
+  }
+
   // ── Type Matchup Chart (attacking type -> defending type multiplier) ──
   // Static table — no extra API calls needed
   var typeChart = {
@@ -273,7 +283,7 @@ $(document).ready(function () {
     return types.map(function(t) {
       var typeName = t.type ? t.type.name : t;
       var color = typeColors[typeName] || '#999';
-      return '<span class="type-badge" style="background:' + color + '">' + capitalize(typeName) + '</span>';
+      return '<span class="type-badge' + badgeToneClass(color) + '" style="background:' + color + '">' + capitalize(typeName) + '</span>';
     }).join(' ');
   }
 
@@ -1058,7 +1068,7 @@ $(document).ready(function () {
       html += '<div class="move-row" data-method="' + method + '" data-move-name="' + moveKey + '">' +
               '<span class="move-level">' + (method === 'level-up' ? 'Lv.' + level : '—') + '</span>' +
               '<span class="move-name">' + capitalize(moveName) + '</span>' +
-              '<span class="move-type" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
+              '<span class="move-type' + badgeToneClass(typeColor) + '" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
               '</div>';
     });
     html += '</div></div>';
@@ -1074,13 +1084,13 @@ $(document).ready(function () {
       var $badge = $row.find('.move-type');
       if (moveCache[moveKey] && moveCache[moveKey].type) {
         var typeName = moveCache[moveKey].type.name;
-        $badge.css('background', typeColors[typeName] || '#999');
+        applyBadgeTone($badge, typeColors[typeName] || '#999');
         return;
       }
       fetchMoveType(moveKey).then(function(data) {
         if (data && data.type && data.type.name) {
           var typeName = data.type.name;
-          $badge.css('background', typeColors[typeName] || '#999');
+          applyBadgeTone($badge, typeColors[typeName] || '#999');
         }
       });
     });
@@ -1291,6 +1301,7 @@ $(document).ready(function () {
       if (mult === 0) cls += ' immune';
       else if (mult >= 2) cls += ' weak';
       else cls += ' resist';
+      cls += badgeToneClass(color);
       html += '<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +
@@ -1340,6 +1351,7 @@ $(document).ready(function () {
       if (mult === 0) cls += ' immune';
       else if (mult >= 2) cls += ' weak';
       else cls += ' resist';
+      cls += badgeToneClass(color);
       html += '<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +

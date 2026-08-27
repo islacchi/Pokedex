@@ -878,6 +878,15 @@ body {
   line-height: 1.5;
 }
 
+/* Dark ink on bright type backgrounds (tone applied via getFillTone):
+   electric/ice/ground etc. previously rendered white at ~1.5-2.7:1 */
+.type-badge.fill-light,
+.move-row .move-type.fill-light,
+.matchup-badge.fill-light {
+  color: #1f2d3d;
+  text-shadow: none;
+}
+
 /* ── Detail Card ──────────────────────────────────────────────────── */
 .detail-card {
   max-width: 540px;

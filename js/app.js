@@ -314,10 +314,11 @@ $(document).ready(function () {
 
   // ── Scroll to Top Button ─────────────────────────────────────────────
   function initScrollTopButton() {
+    var $screen = $('.pokedex-screen');
     var $btn = $('#scroll-top-btn');
 
-    $(window).on('scroll', function() {
-      if ($(window).scrollTop() > 300) {
+    $screen.on('scroll', function() {
+      if ($screen.scrollTop() > 300) {
         $btn.removeClass('hidden');
       } else {
         $btn.addClass('hidden');
@@ -325,7 +326,7 @@ $(document).ready(function () {
     });
 
     $btn.on('click', function() {
-      $('html, body').animate({ scrollTop: 0 }, 300);
+      $screen.animate({ scrollTop: 0 }, 300);
     });
   }
 
@@ -515,7 +516,7 @@ $(document).ready(function () {
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
       var typeColor   = getPrimaryType(p);
-      var bgStyle     = typeColor ? ' style="background:linear-gradient(135deg, ' + typeColor + '22 0%, #2E3B4E 60%)"' : '';
+      var bgStyle     = typeColor ? ' style="background:linear-gradient(135deg, ' + typeColor + '22 0%, #f5f5f0 60%)"' : '';
       html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
@@ -582,11 +583,12 @@ $(document).ready(function () {
   function initPrefetchObserver() {
     if (prefetchObserver) return;
     if (!window.IntersectionObserver) return; // fallback to scroll listener
+    var screenEl = document.querySelector('.pokedex-screen');
     prefetchObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) checkPrefetch();
       });
-    }, { root: null, rootMargin: '300px 0px', threshold: 0.01 });
+    }, { root: screenEl, rootMargin: '300px 0px', threshold: 0.01 });
   }
 
   function setupPrefetchSentinel() {
@@ -1081,7 +1083,7 @@ $(document).ready(function () {
     var labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
     var values = statKeys.map(function(key) { return getStat(stats, key); });
     var maxVal = 255;
-    var cx = 160, cy = 160, radius = 110;
+    var cx = 140, cy = 140, radius = 100;
     var angleStep = (2 * Math.PI) / 6;
 
     function point(i, r) {
@@ -1095,14 +1097,14 @@ $(document).ready(function () {
       var r = radius * ring / 4;
       var pts = [];
       for (var i = 0; i < 6; i++) pts.push(point(i, r));
-      grid += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#3A4A5E" stroke-width="1"/>';
+      grid += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#2a3a4a" stroke-width="1"/>';
     }
 
     // Axis lines
     var axes = '';
     for (var i = 0; i < 6; i++) {
       var p = point(i, radius);
-      axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.split(',')[0] + '" y2="' + p.split(',')[1] + '" stroke="#3A4A5E" stroke-width="1"/>';
+      axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.split(',')[0] + '" y2="' + p.split(',')[1] + '" stroke="#2a3a4a" stroke-width="1"/>';
     }
 
     // Data polygon
@@ -1115,26 +1117,26 @@ $(document).ready(function () {
     // Labels
     var labelHtml = '';
     for (var i = 0; i < 6; i++) {
-      var lp = point(i, radius + 30);
+      var lp = point(i, radius + 24);
       var lx = lp.split(',')[0], ly = lp.split(',')[1];
       labelHtml += '<text x="' + lx + '" y="' + ly + '" class="radar-axis-label" text-anchor="middle">' + labels[i] + '</text>';
     }
 
     // Value labels
     var valueHtml = '';
-    var minLabelR = 48; // never place a value label closer to center than this
+    var minLabelR = 28; // never place a value label closer to center than this
     for (var i = 0; i < 6; i++) {
       var r = radius * Math.min(values[i] / maxVal, 1);
-      var labelR = Math.max(r - 14, minLabelR);
+      var labelR = Math.max(r - 12, minLabelR);
       var vp = point(i, labelR);
       var vx = vp.split(',')[0], vy = vp.split(',')[1];
       valueHtml += '<text x="' + vx + '" y="' + vy + '" class="radar-value-label" text-anchor="middle">' + values[i] + '</text>';
     }
 
     return '<div class="radar-chart">' +
-           '<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">' +
+           '<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">' +
            grid + axes +
-           '<polygon points="' + dataPts.join(' ') + '" fill="rgba(227,53,13,0.25)" stroke="#E3350D" stroke-width="2"/>' +
+           '<polygon points="' + dataPts.join(' ') + '" fill="rgba(204,0,0,0.3)" stroke="#cc0000" stroke-width="2"/>' +
            labelHtml + valueHtml +
            '</svg></div>';
   }
@@ -1411,7 +1413,7 @@ $(document).ready(function () {
         renderMovesSection(p) +
         renderLocationsSection(p) +
         '<div class="evolution-section" id="evo-section">' +
-          '<p class="evo-loading" style="color:#8A9BAE;text-align:center;font-size:10px;font-family:\'JetBrains Mono\',monospace;">Loading evolution…</p>' +
+          '<p class="evo-loading" style="color:#888;text-align:center;font-size:10px;font-family:\'Press Start 2P\',monospace;">Loading evolution…</p>' +
         '</div>' +
         '<div class="stats-section">' +
           '<h3 class="stats-title">Base Stats</h3>' +
@@ -1491,7 +1493,7 @@ $(document).ready(function () {
       hideLoading();
       showDetailView();
       updateUrlHash(id);
-      $(window).scrollTop(0);
+      $('.pokedex-screen').scrollTop(0);
     }).fail(function() {
       hideLoading();
       swal('Error!', 'Could not load Pokémon details.', 'error');
@@ -1516,8 +1518,9 @@ $(document).ready(function () {
   // ── Scroll Progress Bar (bottom action bar) ────────────────────────────
   function updateScrollProgress() {
     var $bar = $('#detail-progress-fill');
-    var st = $(window).scrollTop();
-    var total = document.documentElement.scrollHeight - window.innerHeight;
+    var $screen = $('.pokedex-screen');
+    var st = $screen.scrollTop();
+    var total = $screen[0].scrollHeight - $screen[0].clientHeight;
     var pct = total > 0 ? (st / total) * 100 : 0;
     $bar.css('width', pct + '%');
   }
@@ -1668,7 +1671,7 @@ $(document).ready(function () {
   }
 
   // ── Scroll Listener (fallback + progress) ─────────────────────────────
-  $(window).on('scroll', function() {
+  $('.pokedex-screen').on('scroll', function() {
     // Fallback for browsers without IntersectionObserver
     if (!window.IntersectionObserver) throttledCheckPrefetch();
     // Update scroll progress bar
@@ -1979,7 +1982,7 @@ $(document).ready(function () {
   // ── Click: Back ────────────────────────────────────────────────────────
   $(document).on('click', '.back-btn', function() {
     showListView();
-    $(window).scrollTop(0);
+    $('.pokedex-screen').scrollTop(0);
   });
 
   // ── Click: Evolution node ──────────────────────────────────────────────
@@ -2012,7 +2015,7 @@ $(document).ready(function () {
       } else if (e.key === 'Escape' || e.key === 'Backspace') {
         e.preventDefault();
         showListView();
-        $(window).scrollTop(0);
+        $('.pokedex-screen').scrollTop(0);
       }
     } else if ($('#list-view').hasClass('visible')) {
       // List view: Enter opens first visible card

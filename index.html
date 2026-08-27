@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Pokédex</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1A1D29">
+    <meta name="theme-color" content="#cc0000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pokédex">
@@ -14,10 +14,21 @@
     <link rel="icon" href="./assets/images/icono-pokemon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+<div class="pokedex-frame">
+    <!-- Header / Top Frame -->
+    <div class="pokedex-header">
+        <div class="header-lights">
+            <span class="light light-blue"></span>
+            <span class="light light-red"></span>
+            <span class="light light-yellow"></span>
+            <span class="light light-green"></span>
+        </div>
+    </div>
+
     <!-- Loading Indicator -->
     <div id="loading" class="loading hidden">
         <div class="spinner"></div>
@@ -139,6 +150,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Bottom Frame -->
+    <div class="pokedex-bottom">
+        <div class="speaker-grill">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+</div>
 
 <!-- Scroll to Top Button -->
 <button id="scroll-top-btn" class="scroll-top-btn hidden" title="Scroll to top">↑</button>

@@ -1291,21 +1291,26 @@ $(document).ready(function () {
       return oa - ob;
     });
 
-    var html = '';
+    var verdictTitles = { weak: 'Deals heavy damage', resist: 'Deals reduced damage', immune: 'No effect' };;
+
+    var buckets = { weak: [], resist: [], immune: [] };
     sortedTypes.forEach(function(typeName) {
       var mult = multipliers[typeName];
       if (mult === 1) return; // Skip neutral
       var color = typeColors[typeName] || '#999';
       var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
-      var cls = 'matchup-badge';
-      if (mult === 0) cls += ' immune';
-      else if (mult >= 2) cls += ' weak';
-      else cls += ' resist';
-      cls += badgeToneClass(color);
-      html += '<span class="' + cls + '" style="background:' + color + '">' +
+      var kind = mult === 0 ? 'immune' : (mult >= 2 ? 'weak' : 'resist');
+      var cls = 'matchup-badge ' + kind + badgeToneClass(color);
+      buckets[kind].push('<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +
-              '</span>';
+              '</span>');
+    });
+
+    var html = '';
+    ['weak', 'resist', 'immune'].forEach(function(kind) {
+      if (!buckets[kind].length) return;
+      html += '<div class="matchup-group-title">' + verdictTitles[kind] + '</div>' + buckets[kind].join('');
     });
 
     if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';
@@ -1341,21 +1346,26 @@ $(document).ready(function () {
       return oa - ob;
     });
 
-    var html = '';
+    var verdictTitles = { weak: 'Takes heavy damage', resist: 'Takes reduced damage', immune: 'No effect' };;
+
+    var buckets = { weak: [], resist: [], immune: [] };
     sortedTypes.forEach(function(typeName) {
       var mult = multipliers[typeName];
       if (mult === 1) return; // Skip neutral
       var color = typeColors[typeName] || '#999';
       var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
-      var cls = 'matchup-badge';
-      if (mult === 0) cls += ' immune';
-      else if (mult >= 2) cls += ' weak';
-      else cls += ' resist';
-      cls += badgeToneClass(color);
-      html += '<span class="' + cls + '" style="background:' + color + '">' +
+      var kind = mult === 0 ? 'immune' : (mult >= 2 ? 'weak' : 'resist');
+      var cls = 'matchup-badge ' + kind + badgeToneClass(color);
+      buckets[kind].push('<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +
-              '</span>';
+              '</span>');
+    });
+
+    var html = '';
+    ['weak', 'resist', 'immune'].forEach(function(kind) {
+      if (!buckets[kind].length) return;
+      html += '<div class="matchup-group-title">' + verdictTitles[kind] + '</div>' + buckets[kind].join('');
     });
 
     if (!html) html = '<p class="matchup-neutral">No strong matchups — all neutral.</p>';

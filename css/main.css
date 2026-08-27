@@ -1185,10 +1185,30 @@ body.light-theme .matchup-toggle-btn.active {
 
 .matchup-mult {
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  background: rgba(0,0,0,0.3);
+  font-size: 9px;
+  /* Explicit colors: this chip used to inherit dark ink from fill-light badges */
+  color: #1f2d3d;
+  background: rgba(255,255,255,0.85);
   border-radius: 8px;
   padding: 2px 5px;
+}
+
+/* Effect-direction tint on the value chip: red = punishing matchup,
+   green = favorable, gray = no effect. Inks tuned >=6:1 on these pales */
+.matchup-badge.weak .matchup-mult   { background: #ffd9d2; color: #8c2018; }
+.matchup-badge.resist .matchup-mult { background: #d6f0d4; color: #20601f; }
+.matchup-badge.immune .matchup-mult { background: #e4e7eb; color: #454b52; }
+
+/* Full-width row headers between badge buckets (wording is mode-aware in JS) */
+.matchup-group-title {
+  flex: 0 0 100%;
+  margin-top: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-control-label);
 }
 
 .matchup-neutral {

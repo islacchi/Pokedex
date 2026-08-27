@@ -140,7 +140,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--surface);
+  background: rgba(26, 29, 41, 0.9);
   border: 1px solid var(--border);
   border-radius: 8px;
   z-index: 10;
@@ -525,11 +525,6 @@ body {
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 0 6px var(--border-glow);
-}
-
-/* Cards with type-tinted solid background use the theme surface as base */
-.cont-pokemon[style*="var(--surface)"] {
-  background: var(--surface);
 }
 
 .cont-pokemon:hover {
@@ -1296,14 +1291,6 @@ body {
   border-radius: 3px;
   transition: width 0.4s ease;
 }
-
-/* Color stat bars by stat type via nth-child */
-.stat-row:nth-child(1) .stat-bar-fill { background: linear-gradient(90deg, #ff4d4d, #ff6b6b); }
-.stat-row:nth-child(2) .stat-bar-fill { background: linear-gradient(90deg, #ff9800, #ffb74d); }
-.stat-row:nth-child(3) .stat-bar-fill { background: linear-gradient(90deg, #ffc107, #ffd54f); }
-.stat-row:nth-child(4) .stat-bar-fill { background: linear-gradient(90deg, #42a5f5, #90caf9); }
-.stat-row:nth-child(5) .stat-bar-fill { background: linear-gradient(90deg, #66bb6a, #a5d6a7); }
-.stat-row:nth-child(6) .stat-bar-fill { background: linear-gradient(90deg, #ab47bc, #ce93d8); }
 
 .stat-value {
   font-family: var(--font-mono);

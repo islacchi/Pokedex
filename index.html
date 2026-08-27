@@ -24,21 +24,8 @@
         <span>Loading Pokédex…</span>
     </div>
 
-    <!-- Device Shell -->
-    <div class="pokedex-device">
-        <!-- Device Header: Lens + LED Indicators -->
-        <header class="device-header">
-            <span class="device-lens" aria-hidden="true"></span>
-            <span class="device-leds" aria-hidden="true">
-                <i class="device-led led-blue"></i>
-                <i class="device-led led-red"></i>
-                <i class="device-led led-yellow"></i>
-                <i class="device-led led-green"></i>
-            </span>
-        </header>
-
-        <!-- Screen Area -->
-        <div class="pokedex-screen">
+    <!-- Screen Area -->
+    <div class="pokedex-screen">
         <!-- List View -->
         <div id="list-view" class="view visible">
             <!-- Search Toolbar -->
@@ -141,6 +128,9 @@
             </div>
             <!-- Bottom Action Bar: Progress + Prev/Back/Next -->
             <div id="detail-bottom-nav" class="detail-bottom-nav">
+                <div id="detail-progress" class="detail-progress">
+                    <div id="detail-progress-fill" class="detail-progress-fill"></div>
+                </div>
                 <div class="detail-nav-buttons">
                     <button id="prev-btn" class="nav-btn" title="Previous Pokémon">◀ Prev</button>
                     <button class="back-btn">← Back</button>
@@ -149,7 +139,6 @@
             </div>
         </div>
     </div>
-    </div><!-- /.pokedex-device -->
 
 <!-- Scroll to Top Button -->
 <button id="scroll-top-btn" class="scroll-top-btn hidden" title="Scroll to top">↑</button>

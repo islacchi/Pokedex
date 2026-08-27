@@ -822,6 +822,11 @@ body {
   line-height: 1.2;
 }
 
+/* Solid type-fill cards: auto-contrast labels (see getFillTone in app.js) */
+.cont-pokemon.fill-dark .pkmn-name       { color: #fff; }
+.cont-pokemon.fill-dark .dex-num         { color: rgba(255,255,255,.8); }
+.cont-pokemon.fill-dark .fav-card-btn    { color: rgba(255,255,255,.85); }
+
 .type-badges {
   display: flex;
   gap: 4px;
@@ -930,6 +935,15 @@ body {
   margin: 8px 0 12px;
   position: relative;
 }
+
+/* Solid type-colored profile banner (detail view) */
+.detail-profile {
+  border-radius: 10px;
+  margin: -4px -6px 10px;
+  padding: 14px 10px;
+}
+.info-pokemon .detail-profile.fill-dark .detail-dex-num { color: rgba(255,255,255,.8); }
+.info-pokemon .detail-profile.fill-dark .fav-star-btn   { color: rgba(255,255,255,.9); }
 
 .specific-info {
   width: 140px;

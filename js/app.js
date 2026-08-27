@@ -48,6 +48,20 @@ $(document).ready(function () {
     steel:'#B7B7CE', fairy:'#D685AD'
   };
 
+  // WCAG relative luminance -> picks label tone for solid type fills.
+  // Returns 'dark' when the fill is dark enough to need white text,
+  // 'light' when it stays bright enough for the existing dark text.
+  // Crossover 0.213 is where #fff and near-black (#222) text have equal
+  // contrast against the fill (~4.5:1 AA on either side).
+  function getFillTone(hex) {
+    var lin = function(c) { return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    var r = lin(parseInt(hex.slice(1, 3), 16) / 255);
+    var g = lin(parseInt(hex.slice(3, 5), 16) / 255);
+    var b = lin(parseInt(hex.slice(5, 7), 16) / 255);
+    var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return lum > 0.213 ? 'light' : 'dark';
+  }
+
   // ── Type Matchup Chart (attacking type -> defending type multiplier) ──
   // Static table — no extra API calls needed
   var typeChart = {
@@ -516,8 +530,9 @@ $(document).ready(function () {
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
       var typeColor   = getPrimaryType(p);
-      var bgStyle     = typeColor ? ' style="background:linear-gradient(135deg, ' + typeColor + '22 0%, #f5f5f0 60%)"' : '';
-      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
+      var bgStyle     = typeColor ? ' style="background:' + typeColor + '"' : '';
+      var fillClass   = typeColor ? ' fill-' + getFillTone(typeColor) : '';
+      html += '<div class="cont-pokemon' + fillClass + '" data-id="' + p.id + '"' + bgStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
                 '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
@@ -1338,8 +1353,15 @@ $(document).ready(function () {
     // Add to recent history
     addToRecent(id);
 
+    // Solid type-colored profile banner behind header + sprite
+    var pType = getPrimaryType(p);
+    var profileOpen = '<div class="detail-profile' +
+      (pType ? ' fill-' + getFillTone(pType) : '') + '"' +
+      (pType ? ' style="background:' + pType + '"' : '') + '>';
+
     var html =
       '<div class="info-pokemon">' +
+        profileOpen +
         '<div class="detail-header">' +
           '<span class="detail-dex-num">' + dexNum(p.id) + '</span>' +
           '<h2 class="detail-name">' + displayName + '</h2>' +
@@ -1350,6 +1372,7 @@ $(document).ready(function () {
           '<button class="fav-star-btn' + favClass + '" data-id="' + id + '" title="Toggle favorite">★</button>' +
           '<button class="shiny-toggle" title="Toggle shiny form">✨ Shiny</button>' +
           '<button class="cry-btn" title="Play cry">🔊</button>' +
+        '</div>' +
         '</div>' +
         (flavorText ? '<p class="flavor-text">' + flavorText + '</p>' : '') +
         '<div class="matchup-section">' +

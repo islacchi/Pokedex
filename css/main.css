@@ -2547,9 +2547,17 @@ body.light-theme .speaker-grill span {
   .back-btn,
   .scroll-top-btn,
   .load-more-btn,
-  .damage-calc-btn {
+  .damage-calc-btn,
+  .clear-search,
+  .meta-chip,
+  .matchup-toggle-btn {
     min-height: 40px;
     min-width: 40px;
+  }
+  .meta-chip {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
   }
   .gen-chip,
   .type-chip,
@@ -2672,7 +2680,8 @@ body.light-theme .speaker-grill span {
     font-size: 7px;
   }
   .theme-toggle,
-  .random-btn {
+  .random-btn,
+  .clear-search {
     width: 36px;
     height: 36px;
   }
@@ -2897,9 +2906,25 @@ body.light-theme .speaker-grill span {
   .moves-list {
     max-height: 160px;
   }
+  /* New controls: relax density on small phones */
+  .meta-chip {
+    font-size: 7px;
+    padding: 3px 8px;
+  }
+  .results-meta {
+    gap: 6px;
+    padding: 5px 8px;
+  }
+  .matchup-badge {
+    padding: 4px 7px;
+    font-size: 8px;
+  }
+  .matchup-mult {
+    font-size: 8px;
+  }
+
 }
 
-/* ── Extra Small Phones (≤330px) ──────────────────────────────────── */
 @media (max-width: 330px) {
   .detail-nav-buttons .nav-btn {
     font-size: 0;

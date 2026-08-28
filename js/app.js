@@ -390,9 +390,9 @@ $(document).ready(function () {
 
   // ── Shareable Links (URL hash) ──────────────────────────────────────
   function updateUrlHash(id) {
-    if (history.replaceState) {
-      history.replaceState(null, '', '#/pokemon/' + id);
-    }
+    // Assigning the hash pushes a history entry, so the browser's
+    // Back/Forward buttons walk through viewed pokemon (hashchange below)
+    window.location.hash = '#/pokemon/' + id;
   }
 
   function clearUrlHash() {
@@ -2147,6 +2147,19 @@ $(document).ready(function () {
   // ── Click: Back ────────────────────────────────────────────────────────
   $(document).on('click', '.back-btn', function() {
     showListView();
+  });
+
+  // ── Hash Routing: browser Back/Forward drive the views ────────────────
+  window.addEventListener('hashchange', function() {
+    var m = window.location.hash.match(/^#\/pokemon\/(\d+)$/);
+    if (m) {
+      var id = parseInt(m[1], 10);
+      // Same pokemon already on screen — nothing to do (re-entrancy guard)
+      if (currentDetailId === id && $('#detail-view').hasClass('visible')) return;
+      navigateTo(id);
+    } else if ($('#detail-view').hasClass('visible')) {
+      showListView();
+    }
   });
 
   // ── Click: Evolution node ──────────────────────────────────────────────

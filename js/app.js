@@ -270,6 +270,15 @@ $(document).ready(function () {
     return typeColors[typeName] || null;
   }
 
+  // Display hue for the detail banner wash: normal reads paper-white,
+  // ground reads earth-brown; every other type keeps its canonical color.
+  var FILL_OVERRIDES = { normal: '#f5f3ea', ground: '#8a6a45' };
+  function getPrimaryFill(p) {
+    if (!p.types || p.types.length === 0) return null;
+    var typeName = p.types[0].type ? p.types[0].type.name : p.types[0];
+    return FILL_OVERRIDES[typeName] || typeColors[typeName] || null;
+  }
+
   function getStat(statsArr, key) {
     var found = statsArr.find(function(s) { return s.stat.name === key; });
     return found ? found.base_stat : 0;
@@ -586,10 +595,7 @@ $(document).ready(function () {
       var animated    = getAnimatedSprite(p.name);
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
-      var typeColor   = getPrimaryType(p);
-      var ink         = typeColor ? pickInk(typeColor) : null;
-      var bgStyle     = typeColor ? ' style="background:' + typeColor + '99" data-ink="' + ink + '"' : '';
-      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
+      html += '<div class="cont-pokemon" data-id="' + p.id + '">' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
                 '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
@@ -1443,7 +1449,7 @@ $(document).ready(function () {
     addToRecent(id);
 
     // Solid type-colored profile banner behind header + sprite
-    var pType = getPrimaryType(p);
+    var pType = getPrimaryFill(p);
     var profileOpen = '<div class="detail-profile"' +
       (pType ? ' data-ink="' + pickInk(pType) + '" style="background:' + pType + '99"' : '') + '>';
 

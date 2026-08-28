@@ -854,16 +854,6 @@ body {
   line-height: 1.2;
 }
 
-/* Solid type-fill cards: auto-contrast labels (see getFillTone in app.js).
-   White alphas bumped to .95 — at .8 they fell to ~3.9:1 on dragon/ghost.
-   Light fills get deep slate corners: base grays read ~1.2-2.4:1 there. */
-.cont-pokemon[data-ink="dark"] .pkmn-name       { color: #fff; }
-.cont-pokemon[data-ink="dark"] .dex-num         { color: rgba(255,255,255,.95); }
-.cont-pokemon[data-ink="dark"] .fav-card-btn    { color: rgba(255,255,255,.95); }
-
-.cont-pokemon[data-ink="light"] .pkmn-name      { color: #0b0f18; }
-.cont-pokemon[data-ink="light"] .dex-num        { color: #0b0f18; }
-.cont-pokemon[data-ink="light"] .fav-card-btn   { color: #0b0f18; }
 
 .type-badges {
   display: flex;

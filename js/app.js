@@ -67,9 +67,15 @@ $(document).ready(function () {
     return getFillTone(hex) === 'light' ? ' fill-light' : '';
   }
 
-  // One-stop styling for lazily colored badges
+  // One-stop styling for lazily colored badges.
+  // Move badges default to white ink; normal-type wears a solid white
+  // pill instead of khaki, with fill-light supplying its black text.
   function applyBadgeTone($el, hex) {
-    $el.css('background', hex).toggleClass('fill-light', getFillTone(hex) === 'light');
+    if (hex === typeColors.normal) {
+      $el.css('background', '#ffffff').addClass('fill-light');
+      return;
+    }
+    $el.css('background', hex).removeClass('fill-light');
   }
 
   // ── Type Matchup Chart (attacking type -> defending type multiplier) ──
@@ -581,9 +587,9 @@ $(document).ready(function () {
       var displayName = capitalize(p.name);
       var favClass    = isFavorite(p.id) ? ' active' : '';
       var typeColor   = getPrimaryType(p);
-      var bgStyle     = typeColor ? ' style="background:' + typeColor + '"' : '';
-      var fillClass   = typeColor ? ' fill-' + getFillTone(typeColor) : '';
-      html += '<div class="cont-pokemon' + fillClass + '" data-id="' + p.id + '"' + bgStyle + '>' +
+      var ink         = typeColor ? pickInk(typeColor) : null;
+      var bgStyle     = typeColor ? ' style="background:' + typeColor + '99" data-ink="' + ink + '"' : '';
+      html += '<div class="cont-pokemon" data-id="' + p.id + '"' + bgStyle + '>' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
                 '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
@@ -1068,14 +1074,36 @@ $(document).ready(function () {
       html += '<div class="move-row" data-method="' + method + '" data-move-name="' + moveKey + '">' +
               '<span class="move-level">' + (method === 'level-up' ? 'Lv.' + level : '—') + '</span>' +
               '<span class="move-name">' + capitalize(moveName) + '</span>' +
-              '<span class="move-type' + badgeToneClass(typeColor) + '" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
+              '<span class="move-type" style="background:' + typeColor + '">' + method.replace(/-/g, ' ') + '</span>' +
               '</div>';
     });
     html += '</div></div>';
     return html;
   }
 
-  // Lazy-fetch move types and color-code the badges
+  // ── Readable-ink resolution for washed type fills ──────────────────────
+  // Grid cards and the detail banner paint their type color at 60% over the
+  // panel, so ink is chosen from the BLENDED backdrop, not the raw type hex —
+  // guaranteeing readable labels no matter which of the 18 types is in play.
+  var PANEL_RGB = [22, 32, 48]; // --panel-bg #162030
+  function hexRgb(hex) {
+    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  }
+  function relLum(rgb) {
+    function lin(c) { return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+    return 0.2126 * lin(rgb[0] / 255) + 0.7152 * lin(rgb[1] / 255) + 0.0722 * lin(rgb[2] / 255);
+  }
+  // 'dark' = dark backdrop -> white labels; 'light' = bright backdrop -> dark labels
+  function pickInk(typeHex) {
+    var raw = hexRgb(typeHex);
+    var base = [0, 1, 2].map(function(i) { return 0.6 * raw[i] + 0.4 * PANEL_RGB[i]; });
+    var lb = relLum(base);
+    var cw = (1.0 + 0.05) / (lb + 0.05);            // white ink
+    var cd = (lb + 0.05) / (0.0047 + 0.05);         // #0b0f18 ink
+    return cd >= cw ? 'light' : 'dark';
+  }
+
+  // Lazy-fetch move types and color-code the badges  // Lazy-fetch move types and color-code the badges
   function colorizeMoveTypes($container) {
     $container.find('.move-row').each(function() {
       var $row = $(this);
@@ -1298,7 +1326,7 @@ $(document).ready(function () {
       var color = typeColors[typeName] || '#999';
       var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
       var kind = mult === 0 ? 'immune' : (mult >= 2 ? 'weak' : 'resist');
-      var cls = 'matchup-badge ' + kind + badgeToneClass(color);
+      var cls = 'matchup-badge ' + kind;
       buckets[kind].push('<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +
@@ -1351,7 +1379,7 @@ $(document).ready(function () {
       var color = typeColors[typeName] || '#999';
       var label = mult === 0 ? '0' : (mult === 0.25 ? '¼' : (mult === 0.5 ? '½' : '×' + mult));
       var kind = mult === 0 ? 'immune' : (mult >= 2 ? 'weak' : 'resist');
-      var cls = 'matchup-badge ' + kind + badgeToneClass(color);
+      var cls = 'matchup-badge ' + kind;
       buckets[kind].push('<span class="' + cls + '" style="background:' + color + '">' +
                 '<span class="matchup-type">' + capitalize(typeName) + '</span>' +
                 '<span class="matchup-mult">' + label + '</span>' +
@@ -1414,9 +1442,8 @@ $(document).ready(function () {
 
     // Solid type-colored profile banner behind header + sprite
     var pType = getPrimaryType(p);
-    var profileOpen = '<div class="detail-profile' +
-      (pType ? ' fill-' + getFillTone(pType) : '') + '"' +
-      (pType ? ' style="background:' + pType + '99"' : '') + '>';
+    var profileOpen = '<div class="detail-profile"' +
+      (pType ? ' data-ink="' + pickInk(pType) + '" style="background:' + pType + '99"' : '') + '>';
 
     var html =
       '<div class="info-pokemon">' +

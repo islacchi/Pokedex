@@ -696,7 +696,10 @@ $(document).ready(function () {
 
     if (!batch.length) { isLoadingBatch = false; return; }
 
-    showLoadMore();
+    // Spinner only when the batch actually needs the network
+    if (batch.some(function(entry) { return !pokemonCache[entry.entry_number]; })) {
+      showLoadMore();
+    }
 
     asyncMapConcurrent(batch, function(entry) {
       var id = entry.entry_number;
@@ -1595,7 +1598,8 @@ $(document).ready(function () {
 
   function navigateTo(id) {
     if (!id) return;
-    showLoading();
+    // Full-screen skeleton only when a network round-trip is actually needed
+    if (!pokemonCache[id] || !speciesCache[id]) showLoading();
     var fetchPokemon = pokemonCache[id]
       ? $.Deferred().resolve(pokemonCache[id]).promise()
       : ajaxWithRetry({ url: 'https://pokeapi.co/api/v2/pokemon/' + id, type: 'GET', dataType: 'json' }, 1)

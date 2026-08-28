@@ -676,7 +676,7 @@ body {
 }
 
 .skeleton-card {
-  background: #f5f5f0;
+  background: var(--card-bg);
   border-radius: 10px;
   padding: 12px 8px 10px;
   display: flex;
@@ -810,7 +810,9 @@ body {
 
 /* ── List Card (cont-pokemon) ─────────────────────────────────────── */
 .cont-pokemon {
-  background: #f5f5f0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-sizing: border-box;
   border-radius: 10px;
   padding: 12px 8px 10px;
   display: flex;
@@ -833,7 +835,7 @@ body {
   left: 8px;
   font-family: 'Press Start 2P', monospace;
   font-size: 9px;
-  color: #888;
+  color: #8fa5c0;
 }
 
 .cont-pokemon .img-pkmn {
@@ -848,7 +850,7 @@ body {
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 13px;
-  color: #222;
+  color: #e6edf3;
   text-align: center;
   margin-bottom: 6px;
   line-height: 1.2;
@@ -2483,6 +2485,22 @@ body.light-theme .location-row {
 
 body.light-theme .location-row .location-name {
   color: #333;
+}
+
+body.light-theme .cont-pokemon {
+  border-color: transparent;
+}
+
+body.light-theme .cont-pokemon .pkmn-name {
+  color: #222;
+}
+
+body.light-theme .cont-pokemon .dex-num {
+  color: #888;
+}
+
+body.light-theme .cont-pokemon .fav-card-btn {
+  color: #666;
 }
 
 body.light-theme .skeleton-card {

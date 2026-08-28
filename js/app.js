@@ -1113,6 +1113,25 @@ $(document).ready(function () {
     return cd >= cw ? 'light' : 'dark';
   }
 
+  // ── Layered detail banner backdrop ─────────────────────────────────────
+  // Uniform structure for every pokemon — diagonal type-tinted gradient,
+  // soft light pool behind the sprite, faint dot texture. Ink stays keyed
+  // to the label-safe mid tone via pickInk, so existing tone rules hold.
+  function shadeRgb(hex, pct) {
+    return hexRgb(hex).map(function(c) {
+      return Math.max(0, Math.min(255, Math.round(pct > 0 ? c + (255 - c) * pct : c * (1 + pct))));
+    });
+  }
+  function rgba(rgb, a) { return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'; }
+  function detailBannerStyle(typeHex) {
+    var light = rgba(shadeRgb(typeHex,  0.22), 0.62);
+    var mid   = rgba(hexRgb(typeHex),      0.62);
+    var deep  = rgba(shadeRgb(typeHex, -0.28), 0.68);
+    return 'radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.6px) 0 0/22px 22px,' +
+           'radial-gradient(120% 100% at 50% 105%, rgba(255,255,255,.14) 0%, transparent 60%),' +
+           'linear-gradient(135deg, ' + light + ' 0%, ' + mid + ' 48%, ' + deep + ' 100%)';
+  }
+
   // Lazy-fetch move types and color-code the badges  // Lazy-fetch move types and color-code the badges
   function colorizeMoveTypes($container) {
     var rows = [];
@@ -1449,10 +1468,10 @@ $(document).ready(function () {
     // Add to recent history
     addToRecent(id);
 
-    // Solid type-colored profile banner behind header + sprite
+    // Layered type-tinted banner backdrop (gradient + sprite glow + dot texture)
     var pType = getPrimaryFill(p);
     var profileOpen = '<div class="detail-profile"' +
-      (pType ? ' data-ink="' + pickInk(pType) + '" style="background:' + pType + '99"' : '') + '>';
+      (pType ? ' data-ink="' + pickInk(pType) + '" style="background:' + detailBannerStyle(pType) + '"' : '') + '>';
 
     var html =
       '<div class="info-pokemon">' +

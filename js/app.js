@@ -72,7 +72,8 @@ $(document).ready(function () {
   // pill instead of khaki, with fill-light supplying its black text.
   function applyBadgeTone($el, hex) {
     if (hex === typeColors.normal) {
-      $el.css('background', '#ffffff').addClass('fill-light');
+      // Normal wears paper-white for consistency with pills and banners
+      $el.css('background', FILL_OVERRIDES.normal).addClass('fill-light');
       return;
     }
     $el.css('background', hex).removeClass('fill-light');
@@ -297,7 +298,7 @@ $(document).ready(function () {
     if (!types || types.length === 0) return '';
     return types.map(function(t) {
       var typeName = t.type ? t.type.name : t;
-      var color = typeColors[typeName] || '#999';
+      var color = FILL_OVERRIDES[typeName] || typeColors[typeName] || '#999';
       return '<span class="type-badge' + badgeToneClass(color) + '" style="background:' + color + '">' + capitalize(typeName) + '</span>';
     }).join(' ');
   }

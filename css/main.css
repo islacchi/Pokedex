@@ -872,18 +872,24 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   letter-spacing: 0.3px;
   line-height: 1.5;
-  /* Lifts the pill off same-hue card/banner fills: faint white veil +
-     dark hairline rim. Painted as box-shadows because the inline
-     `background:` shorthand would override a stylesheet background-image. */
-  box-shadow: inset 0 0 0 999px rgba(255,255,255,.14),
-              0 0 0 1px rgba(0,0,0,.28);
+  /* Uniform pill geometry: centered, equal width for short types */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  /* Gentle separation on colored banners (grid is white now): soft
+     white veil + subtle dark hairline to keep clips defined */
+  box-shadow: inset 0 0 0 999px rgba(255,255,255,.10),
+              0 0 0 1px rgba(0,0,0,.22);
 }
 
 /* Dark ink on bright type backgrounds (tone applied via getFillTone):
    electric/ice/ground etc. previously rendered white at ~1.5-2.7:1 */
 .type-badge.fill-light,
 .move-row .move-type.fill-light {
-  color: #1f2d3d;
+  color: #111;
   text-shadow: none;
 }
 

@@ -1105,23 +1105,22 @@ $(document).ready(function () {
 
   // Lazy-fetch move types and color-code the badges  // Lazy-fetch move types and color-code the badges
   function colorizeMoveTypes($container) {
+    var rows = [];
     $container.find('.move-row').each(function() {
-      var $row = $(this);
-      var moveKey = $row.attr('data-move-name');
-      if (!moveKey) return;
-      var $badge = $row.find('.move-type');
-      if (moveCache[moveKey] && moveCache[moveKey].type) {
-        var typeName = moveCache[moveKey].type.name;
-        applyBadgeTone($badge, typeColors[typeName] || '#999');
-        return;
-      }
-      fetchMoveType(moveKey).then(function(data) {
+      var moveKey = $(this).attr('data-move-name');
+      if (moveKey) rows.push({ $badge: $(this).find('.move-type'), key: moveKey });
+    });
+    if (!rows.length) return;
+
+    // Cap concurrent move lookups instead of firing ~100 requests at once;
+    // fetchMoveType never rejects, so one failed badge can't abort the queue
+    asyncMapConcurrent(rows, function(row) {
+      return fetchMoveType(row.key).then(function(data) {
         if (data && data.type && data.type.name) {
-          var typeName = data.type.name;
-          applyBadgeTone($badge, typeColors[typeName] || '#999');
+          applyBadgeTone(row.$badge, typeColors[data.type.name] || '#999');
         }
       });
-    });
+    }, CONCURRENCY);
   }
 
   // ── Locations Section ────────────────────────────────────────────────

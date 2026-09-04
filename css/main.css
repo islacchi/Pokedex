@@ -850,11 +850,12 @@ body {
   object-fit: contain;
   image-rendering: pixelated;
   margin: 4px 0 6px;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .cont-pokemon:hover .img-pkmn {
-  transform: scale(1.12);
+  transform: scale(1.15);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 }
 
 .cont-pokemon .pkmn-name {

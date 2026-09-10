@@ -1822,11 +1822,23 @@ $(document).ready(function () {
   }
 
   // ── Scroll Listener (fallback + progress) ─────────────────────────────
+  var scrollProgressRafId = null;
+  function scheduleScrollProgress() {
+    if (scrollProgressRafId !== null) return;
+    if (window.requestAnimationFrame) {
+      scrollProgressRafId = window.requestAnimationFrame(function() {
+        scrollProgressRafId = null;
+        updateScrollProgress();
+      });
+    } else {
+      updateScrollProgress();
+    }
+  }
   $('.pokedex-screen').on('scroll', function() {
     // Fallback for browsers without IntersectionObserver
     if (!window.IntersectionObserver) throttledCheckPrefetch();
-    // Update scroll progress bar
-    updateScrollProgress();
+    // Throttle progress-bar layout reads/writes to one update per frame
+    scheduleScrollProgress();
   });
 
   // ── Search (debounced) ─────────────────────────────────────────────────

@@ -610,7 +610,7 @@ $(document).ready(function () {
       html += '<div class="cont-pokemon" data-id="' + p.id + '">' +
                 '<span class="dex-num">' + dexNum(p.id) + '</span>' +
                 '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
-                '<img class="img-pkmn" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
+                '<img class="img-pkmn" width="80" height="80" decoding="async" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
                 '<span class="pkmn-name">' + displayName + '</span>' +
                 '<div class="type-badges">' + typeBadges(p.types) + '</div>' +
               '</div>';

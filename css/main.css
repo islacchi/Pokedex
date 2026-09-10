@@ -2555,6 +2555,7 @@ body.light-theme .speaker-grill span {
 .cont-pokemon {
   content-visibility: auto;
   contain-intrinsic-size: 160px;
+  contain: layout style paint;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */

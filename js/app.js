@@ -2032,6 +2032,7 @@ $(document).ready(function () {
   // ── Compare Feature ───────────────────────────────────────────────────
   var compareMode = false;
   var compareSelection = [];
+  var compareInitialized = false;
 
   function updateCompareUI() {
     $('#compare-count').text(compareSelection.length + '/3');
@@ -2083,24 +2084,26 @@ $(document).ready(function () {
     }
   }
 
+  function initCompareFeature() {
+    if (compareInitialized) return;
+    compareInitialized = true;
+    $('#compare-clear').on('click', function() {
+      compareSelection = [];
+      updateCompareUI();
+    });
+    $('#compare-close').on('click', closeCompareModal);
+    $('#compare-modal').on('click', function(e) {
+      if (e.target === this) closeCompareModal();
+    });
+  }
+
   $('#compare-toggle').on('click', function() {
+    initCompareFeature();
     compareMode = !compareMode;
     if (!compareMode) {
       compareSelection = [];
     }
     updateCompareUI();
-  });
-
-  $('#compare-clear').on('click', function() {
-    compareSelection = [];
-    updateCompareUI();
-  });
-
-  $('#compare-close').on('click', closeCompareModal);
-
-  // Clicking the dimmed backdrop (outside the panel) also closes
-  $('#compare-modal').on('click', function(e) {
-    if (e.target === this) closeCompareModal();
   });
 
   $(document).on('click', '.cont-pokemon', function(e) {
@@ -2124,17 +2127,15 @@ $(document).ready(function () {
   });
 
   // ── Damage Calculator ────────────────────────────────────────────────
+  var damageCalculatorInitialized = false;
   function initDamageCalculator() {
+    if (damageCalculatorInitialized) return;
+    damageCalculatorInitialized = true;
     var $attack = $('#damage-attack-type');
     var $defend = $('#damage-defend-type');
     Object.keys(typeColors).forEach(function(typeName) {
       $attack.append('<option value="' + typeName + '">' + capitalize(typeName) + '</option>');
       $defend.append('<option value="' + typeName + '">' + capitalize(typeName) + '</option>');
-    });
-
-    $('#damage-toggle').on('click', function() {
-      $('#damage-calc').toggleClass('hidden');
-      $(this).toggleClass('active');
     });
 
     $('#damage-calc-btn').on('click', function() {
@@ -2158,7 +2159,11 @@ $(document).ready(function () {
     });
   }
 
-  initDamageCalculator();
+  $('#damage-toggle').on('click', function() {
+    initDamageCalculator();
+    $('#damage-calc').toggleClass('hidden');
+    $(this).toggleClass('active');
+  });
 
   // ── Click: Matchup mode toggle ─────────────────────────────────────────
   $(document).on('click', '.matchup-toggle-btn', function(e) {

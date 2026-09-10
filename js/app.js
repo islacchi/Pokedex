@@ -2019,7 +2019,7 @@ $(document).ready(function () {
       var sprite = getGridSprite(p.sprites) || fallbackSprite(id);
       html += '<div class="compare-card">' +
               '<div class="compare-pkmn-name">' + capitalize(p.name) + '</div>' +
-              '<img class="compare-pkmn-sprite" src="' + sprite + '" alt="' + p.name + '">';
+              '<img class="compare-pkmn-sprite" width="60" height="60" decoding="async" src="' + sprite + '" alt="' + p.name + '">';
       statKeys.forEach(function(key, i) {
         var val = getStat(p.stats, key);
         html += '<div class="compare-stat">' +

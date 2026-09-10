@@ -273,6 +273,26 @@ $(document).ready(function () {
     return !!(p && e);
   }
 
+  // IndexedDB dual-write: async mirror of the slim localStorage payload.
+  function persistIndexedDbCaches() {
+    if (!idbSupported()) return;
+    try {
+      var pokemonKeys = Object.keys(pokemonCache);
+      var speciesKeys = Object.keys(speciesCache);
+      var writes = [];
+      pokemonKeys.forEach(function(idStr) {
+        writes.push(idbPut(IDB_STORE_POKEMON, idStr, slimPokemonEntry(pokemonCache[idStr])));
+      });
+      speciesKeys.forEach(function(idStr) {
+        writes.push(idbPut(IDB_STORE_SPECIES, idStr, speciesCache[idStr]));
+      });
+      writes.push(idbPut(IDB_STORE_META, 'entries', pokemonEntries));
+      writes.push(idbPut(IDB_STORE_META, 'timestamp', Date.now()));
+      writes.push(idbPut(IDB_STORE_META, 'version', CACHE_VERSION));
+      Promise.all(writes).catch(function() { /* IndexedDB write failed - localStorage remains source of truth */ });
+    } catch (e) { /* never block persistence */ }
+  }
+
   function persistCaches() {
     try {
       var slimPokemonCache = {};
@@ -287,6 +307,7 @@ $(document).ready(function () {
     } catch(e) {
       // Quota exceeded — skip silently
     }
+    persistIndexedDbCaches();
   }
 
   // ── Concurrency Control ────────────────────────────────────────────────

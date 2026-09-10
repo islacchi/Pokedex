@@ -1498,7 +1498,7 @@ $(document).ready(function () {
           '</div>' +
         '</div>' +
         '<div class="detail-sprite-wrap">' +
-          '<img class="specific-info" src="' + PLACEHOLDER_SVG + '" data-src="' + sprite + '" alt="' + displayName + '">' +
+          '<img class="specific-info" width="140" height="140" decoding="async" fetchpriority="high" src="' + PLACEHOLDER_SVG + '" data-src="' + sprite + '" alt="' + displayName + '">' +
           '<button class="shiny-toggle" title="Toggle shiny form">✨ Shiny</button>' +
           '<button class="cry-btn" title="Play cry">🔊</button>' +
         '</div>' +

@@ -20,6 +20,17 @@ $(document).ready(function () {
   var evolutionCache = {};   // chain_url -> chain data
   var moveCache      = {};   // move_name -> move data (type, power, etc.)
   var formCache      = {};   // form_name -> form data (sprites, etc.)
+  var MAX_LOOKUP_CACHE = 250;
+
+  // Bounded lookup cache: refresh recency and evict least-recently used.
+  function setLookupCache(cache, key, value, maxEntries) {
+    if (Object.prototype.hasOwnProperty.call(cache, key)) delete cache[key];
+    cache[key] = value;
+    var keys = Object.keys(cache);
+    while (keys.length > maxEntries) {
+      delete cache[keys.shift()];
+    }
+  }
   var pokemonEntries = [];   // raw entries from pokedex endpoint
   var allPokemonDetails = [];
   var loadedCount    = 0;
@@ -993,10 +1004,10 @@ $(document).ready(function () {
       url: 'https://pokeapi.co/api/v2/pokemon-form/' + formName,
       type: 'GET', dataType: 'json'
     }, 1).then(function(data) {
-      formCache[formName] = data;
+      setLookupCache(formCache, formName, data, MAX_LOOKUP_CACHE);
       return data;
     }).fail(function() {
-      formCache[formName] = null;
+      setLookupCache(formCache, formName, null, MAX_LOOKUP_CACHE);
       return null;
     });
   }
@@ -1053,10 +1064,10 @@ $(document).ready(function () {
       url: 'https://pokeapi.co/api/v2/move/' + moveName,
       type: 'GET', dataType: 'json'
     }, 1).then(function(data) {
-      moveCache[moveName] = data;
+      setLookupCache(moveCache, moveName, data, MAX_LOOKUP_CACHE);
       return data;
     }).fail(function() {
-      moveCache[moveName] = null;
+      setLookupCache(moveCache, moveName, null, MAX_LOOKUP_CACHE);
       return null;
     });
   }

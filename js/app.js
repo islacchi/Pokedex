@@ -7,7 +7,7 @@ $(document).ready(function () {
 
   // Cache TTL: 7 days in ms
   var CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
-  var CACHE_VERSION = 2; // bump when cache schema changes
+  var CACHE_VERSION = 3; // bump when cache schema changes
   var CACHE_KEY_POKEMON  = 'pokedex_pokemon_cache';
   var CACHE_KEY_SPECIES  = 'pokedex_species_cache';
   var CACHE_KEY_ENTRIES  = 'pokedex_entries_cache';
@@ -164,6 +164,21 @@ $(document).ready(function () {
   }
 
   // ── LocalStorage Cache ─────────────────────────────────────────────────
+  // Slim localStorage payload: keep only fields consumed by list/detail flows.
+  var SLIM_POKEMON_FIELDS = ['id', 'name', 'sprites', 'types', 'stats', 'height', 'weight', 'abilities', 'base_experience', 'cries', 'forms', 'moves', 'location_area_encounters'];
+  function slimPokemonEntry(data) {
+    if (!data) return data;
+    var slim = {};
+    SLIM_POKEMON_FIELDS.forEach(function(key) {
+      if (data[key] !== undefined) slim[key] = data[key];
+    });
+    return slim;
+  }
+  function expandPokemonEntry(entry) {
+    if (!entry) return entry;
+    if (entry.full === true) return entry.data;
+    return entry;
+  }
   function tryParse(str) {
     try { return JSON.parse(str); } catch(e) { return null; }
   }
@@ -183,7 +198,11 @@ $(document).ready(function () {
     var p = tryParse(localStorage.getItem(CACHE_KEY_POKEMON));
     var s = tryParse(localStorage.getItem(CACHE_KEY_SPECIES));
     var e = tryParse(localStorage.getItem(CACHE_KEY_ENTRIES));
-    if (p) pokemonCache  = p;
+    if (p) {
+      Object.keys(p).forEach(function(idStr) {
+        pokemonCache[idStr] = expandPokemonEntry(p[idStr]);
+      });
+    }
     if (s) speciesCache  = s;
     if (e) pokemonEntries = e;
     return !!(p && e);
@@ -191,7 +210,11 @@ $(document).ready(function () {
 
   function persistCaches() {
     try {
-      localStorage.setItem(CACHE_KEY_POKEMON,  JSON.stringify(pokemonCache));
+      var slimPokemonCache = {};
+      Object.keys(pokemonCache).forEach(function(idStr) {
+        slimPokemonCache[idStr] = slimPokemonEntry(pokemonCache[idStr]);
+      });
+      localStorage.setItem(CACHE_KEY_POKEMON,  JSON.stringify(slimPokemonCache));
       localStorage.setItem(CACHE_KEY_SPECIES,  JSON.stringify(speciesCache));
       localStorage.setItem(CACHE_KEY_ENTRIES,  JSON.stringify(pokemonEntries));
       localStorage.setItem(CACHE_KEY_TS, String(Date.now()));

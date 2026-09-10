@@ -58,18 +58,6 @@ body.light-theme {
   outline-offset: 2px;
 }
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible {
-  outline: 3px solid #fbc02d;
-  outline-offset: 2px;
-}
-
-.cont-pokemon:focus-visible {
-  outline: 3px solid #fbc02d;
-  outline-offset: 2px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -163,6 +163,71 @@ $(document).ready(function () {
     }
   }
 
+  // ── IndexedDB Foundation ───────────────────────────────────────────────
+  // Step 1 only: async storage helpers. Existing localStorage startup path is unchanged.
+  var IDB_NAME = 'pokedex-db';
+  var IDB_VERSION = 1;
+  var IDB_STORE_POKEMON = 'pokemon';
+  var IDB_STORE_SPECIES = 'species';
+  var IDB_STORE_META = 'meta';
+  var idbPromise = null;
+
+  function idbSupported() {
+    return typeof window !== 'undefined' && !!window.indexedDB;
+  }
+  function idbOpen() {
+    if (idbPromise) return idbPromise;
+    idbPromise = new Promise(function(resolve, reject) {
+      if (!idbSupported()) {
+        reject(new Error('IndexedDB unavailable'));
+        return;
+      }
+      var request = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+      request.onupgradeneeded = function(event) {
+        var db = event.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE_POKEMON)) db.createObjectStore(IDB_STORE_POKEMON);
+        if (!db.objectStoreNames.contains(IDB_STORE_SPECIES)) db.createObjectStore(IDB_STORE_SPECIES);
+        if (!db.objectStoreNames.contains(IDB_STORE_META)) db.createObjectStore(IDB_STORE_META);
+      };
+      request.onsuccess = function(event) { resolve(event.target.result); };
+      request.onerror = function(event) { reject(event.target.error || new Error('IndexedDB open failed')); };
+      request.onblocked = function() { reject(new Error('IndexedDB blocked')); };
+    });
+    return idbPromise;
+  }
+  function idbTransaction(storeName, mode) {
+    return idbOpen().then(function(db) {
+      return db.transaction(storeName, mode).objectStore(storeName);
+    });
+  }
+  function idbPut(storeName, key, value) {
+    return idbTransaction(storeName, 'readwrite').then(function(store) {
+      return new Promise(function(resolve, reject) {
+        var request = store.put(value, key);
+        request.onsuccess = function() { resolve(true); };
+        request.onerror = function(event) { reject(event.target.error || new Error('IndexedDB put failed')); };
+      });
+    });
+  }
+  function idbGet(storeName, key) {
+    return idbTransaction(storeName, 'readonly').then(function(store) {
+      return new Promise(function(resolve, reject) {
+        var request = store.get(key);
+        request.onsuccess = function(event) { resolve(event.target.result); };
+        request.onerror = function(event) { reject(event.target.error || new Error('IndexedDB get failed')); };
+      });
+    });
+  }
+  function idbGetAll(storeName) {
+    return idbTransaction(storeName, 'readonly').then(function(store) {
+      return new Promise(function(resolve, reject) {
+        var request = store.getAll();
+        request.onsuccess = function(event) { resolve(event.target.result || []); };
+        request.onerror = function(event) { reject(event.target.error || new Error('IndexedDB read failed')); };
+      });
+    });
+  }
+
   // ── LocalStorage Cache ─────────────────────────────────────────────────
   // Slim localStorage payload: keep only fields consumed by list/detail flows.
   var SLIM_POKEMON_FIELDS = ['id', 'name', 'sprites', 'types', 'stats', 'height', 'weight', 'abilities', 'base_experience', 'cries', 'forms', 'moves', 'location_area_encounters'];

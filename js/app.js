@@ -987,7 +987,7 @@ $(document).ready(function () {
       if (!p) return;
       var sprite = getGridSprite(p.sprites) || fallbackSprite(id);
       html += '<div class="recent-chip" data-id="' + id + '">' +
-              '<img class="recent-sprite" src="' + sprite + '" alt="' + p.name + '">' +
+              '<img class="recent-sprite" width="48" height="48" decoding="async" loading="lazy" src="' + sprite + '" alt="' + p.name + '">' +
               '<span class="recent-name">' + capitalize(p.name) + '</span>' +
               '</div>';
     });
@@ -1022,7 +1022,7 @@ $(document).ready(function () {
       var formKey  = form.name;
       var formSprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.id + '.png';
       html += '<div class="form-chip" data-form="' + formKey + '">' +
-              '<img class="form-sprite" data-src="' + formSprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + formName + '">' +
+              '<img class="form-sprite" width="48" height="48" decoding="async" loading="lazy" data-src="' + formSprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + formName + '">' +
               '<span class="form-name">' + capitalize(formName) + '</span>' +
               '</div>';
     });

@@ -390,13 +390,28 @@ $(document).ready(function () {
   function initScrollTopButton() {
     var $screen = $('.pokedex-screen');
     var $btn = $('#scroll-top-btn');
-
-    $screen.on('scroll', function() {
+    var scrollTopRafId = null;
+    function updateScrollTopVisibility() {
       if ($screen.scrollTop() > 300) {
         $btn.removeClass('hidden');
       } else {
         $btn.addClass('hidden');
       }
+    }
+    function scheduleScrollTopVisibility() {
+      if (scrollTopRafId !== null) return;
+      if (window.requestAnimationFrame) {
+        scrollTopRafId = window.requestAnimationFrame(function() {
+          scrollTopRafId = null;
+          updateScrollTopVisibility();
+        });
+      } else {
+        updateScrollTopVisibility();
+      }
+    }
+
+    $screen.on('scroll', function() {
+      scheduleScrollTopVisibility();
     });
 
     $btn.on('click', function() {

@@ -846,7 +846,7 @@ $(document).ready(function () {
 
     var isCurrent = (speciesId === currentId);
     var nodeHtml  = '<div class="evo-node' + (isCurrent ? ' current' : '') + '" data-id="' + speciesId + '">' +
-                    '<img class="evo-sprite" data-src="' + sprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + speciesName + '" loading="lazy">' +
+                    '<img class="evo-sprite" width="56" height="56" decoding="async" data-src="' + sprite + '" src="' + PLACEHOLDER_SVG + '" alt="' + speciesName + '" loading="lazy">' +
                     '<span class="evo-name">' + capitalize(speciesName) + '</span>' +
                     '</div>';
 

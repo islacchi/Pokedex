@@ -1,5 +1,14 @@
 const CACHE_NAME = 'pokedex-v2';
 const IMAGE_CACHE_NAME = 'pokedex-images-v1';
+const MAX_IMAGE_ENTRIES = 600;
+
+// Keep the dedicated image cache bounded by evicting oldest entries.
+function pruneImageCache(cache, maxEntries) {
+  return cache.keys().then((keys) => {
+    if (keys.length <= maxEntries) return;
+    return Promise.all(keys.slice(0, keys.length - maxEntries).map((key) => cache.delete(key)));
+  });
+}
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -52,7 +61,7 @@ self.addEventListener('fetch', (event) => {
         cache.match(event.request).then((cached) => {
           // Return cached immediately, refresh in background
           const fetchPromise = fetch(event.request).then((response) => {
-            cache.put(event.request, response.clone());
+            cache.put(event.request, response.clone()).then(() => pruneImageCache(cache, MAX_IMAGE_ENTRIES));
             return response;
           }).catch(() => cached);
           return cached || fetchPromise;

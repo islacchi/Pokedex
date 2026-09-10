@@ -293,6 +293,48 @@ $(document).ready(function () {
     } catch (e) { /* never block persistence */ }
   }
 
+  // IndexedDB startup hydration: async alternative to localStorage.
+  function hydrateIndexedDbCaches() {
+    if (!idbSupported()) return Promise.resolve(false);
+    return Promise.all([
+      idbGet(IDB_STORE_META, 'timestamp'),
+      idbGet(IDB_STORE_META, 'version'),
+      idbGet(IDB_STORE_META, 'entries')
+    ]).then(function(meta) {
+      var ts = parseInt(meta[0] || '0', 10);
+      var ver = parseInt(meta[1] || '0', 10);
+      var entries = meta[2];
+      if (!ts || (Date.now() - ts) > CACHE_TTL || ver !== CACHE_VERSION || !entries) return false;
+      return idbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          var tx = db.transaction([IDB_STORE_POKEMON, IDB_STORE_SPECIES], 'readonly');
+          var pokemonStore = tx.objectStore(IDB_STORE_POKEMON);
+          var speciesStore = tx.objectStore(IDB_STORE_SPECIES);
+          var pokemonReq = pokemonStore.getAll();
+          var pokemonKeysReq = pokemonStore.getAllKeys();
+          var speciesReq = speciesStore.getAll();
+          var speciesKeysReq = speciesStore.getAllKeys();
+          tx.oncomplete = function() {
+            var pokemonValues = pokemonReq.result || [];
+            var pokemonKeys = pokemonKeysReq.result || [];
+            var speciesValues = speciesReq.result || [];
+            var speciesKeys = speciesKeysReq.result || [];
+            if (!pokemonKeys.length || !entries.length) { resolve(false); return; }
+            pokemonKeys.forEach(function(key, i) {
+              pokemonCache[key] = expandPokemonEntry(pokemonValues[i]);
+            });
+            speciesKeys.forEach(function(key, i) {
+              speciesCache[key] = speciesValues[i];
+            });
+            pokemonEntries = entries;
+            resolve(true);
+          };
+          tx.onerror = function(event) { reject(event.target.error || new Error('IndexedDB startup read failed')); };
+        });
+      });
+    }).catch(function() { return false; });
+  }
+
   function persistCaches() {
     try {
       var slimPokemonCache = {};
@@ -1947,14 +1989,23 @@ $(document).ready(function () {
   initThemeToggle();
   handleUrlHash();
 
-  // Hydrate from localStorage; skip network on return visits
-  var wasCached = hydrateCaches();
-  if (wasCached && pokemonEntries.length > 0) {
+  // Hydrate from IndexedDB first, then localStorage; skip network on return visits
+  function bootFromHydratedCache() {
     bootstrapFromCache();
     applyFilters();
-  } else {
-    fetchPokedex();
   }
+  hydrateIndexedDbCaches().then(function(hydrated) {
+    if (hydrated && pokemonEntries.length > 0) {
+      bootFromHydratedCache();
+      return;
+    }
+    var wasCached = hydrateCaches();
+    if (wasCached && pokemonEntries.length > 0) {
+      bootFromHydratedCache();
+    } else {
+      fetchPokedex();
+    }
+  });
 
   // ── Scroll Listener (fallback + progress) ─────────────────────────────
   var scrollProgressRafId = null;

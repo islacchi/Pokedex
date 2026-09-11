@@ -742,12 +742,30 @@ $(document).ready(function () {
   // ── Virtualized Grid ────────────────────────────────────────────────
   var VIRTUAL_PAGE_SIZE = 60;
   var virtualPage = 1;
+  var currentFilteredList = [];
+
+  // Step 1: extracted card renderer used by the paged grid;
+  // later virtualization can reuse it for windowed rendering.
+  function buildCardHtml(p) {
+    var sprite = getGridSprite(p.sprites) || fallbackSprite(p.id);
+    var animated = getAnimatedSprite(p.name);
+    var displayName = capitalize(p.name);
+    var favClass = isFavorite(p.id) ? ' active' : '';
+    return '<div class="cont-pokemon" data-id="' + p.id + '">' +
+             '<span class="dex-num">' + dexNum(p.id) + '</span>' +
+             '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
+             '<img class="img-pkmn" width="80" height="80" decoding="async" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
+             '<span class="pkmn-name">' + displayName + '</span>' +
+             '<div class="type-badges">' + typeBadges(p.types) + '</div>' +
+           '</div>';
+  }
 
   function applyFilters() {
     var $grid    = $('#elementos');
     var filtered = allPokemonDetails.filter(pokemonMatchesFilters);
     filtered = sortPokemon(filtered);
     var totalFiltered = filtered.length;
+    currentFilteredList = filtered;
     var visible = filtered.slice(0, VIRTUAL_PAGE_SIZE * virtualPage);
 
     // Show/hide no-results message
@@ -769,17 +787,7 @@ $(document).ready(function () {
     // Build HTML in one string — avoids N separate DOM insertions
     var html = '';
     visible.forEach(function(p) {
-      var sprite      = getGridSprite(p.sprites) || fallbackSprite(p.id);
-      var animated    = getAnimatedSprite(p.name);
-      var displayName = capitalize(p.name);
-      var favClass    = isFavorite(p.id) ? ' active' : '';
-      html += '<div class="cont-pokemon" data-id="' + p.id + '">' +
-                '<span class="dex-num">' + dexNum(p.id) + '</span>' +
-                '<button class="fav-card-btn' + favClass + '" data-id="' + p.id + '" title="Toggle favorite">★</button>' +
-                '<img class="img-pkmn" width="80" height="80" decoding="async" data-src="' + sprite + '" data-animated="' + animated + '" src="' + PLACEHOLDER_SVG + '" alt="' + displayName + '" loading="lazy">' +
-                '<span class="pkmn-name">' + displayName + '</span>' +
-                '<div class="type-badges">' + typeBadges(p.types) + '</div>' +
-              '</div>';
+      html += buildCardHtml(p);
     });
     $grid.html(html); // single DOM write
 

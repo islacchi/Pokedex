@@ -2140,6 +2140,36 @@ $(document).ready(function () {
     scheduleScrollProgress();
   });
 
+  // ── Prefetch on hover ────────────────────────────────────────────────
+  // Lightweight prefetch of detail data on hover/focus so opening
+  // a card feels instant even if its detail resources are uncached.
+  var hoverPrefetchTimers = {};
+  function prefetchDetail(id) {
+    if (!id || id < 1 || id > 1025) return;
+    if (pokemonCache[id]) return;
+    if (!pokemonEntries.some(function(e) { return e.entry_number === id; })) return;
+    ajaxWithRetry({ url: "https://pokeapi.co/api/v2/pokemon/" + id, type: "GET", dataType: "json" }, 1)
+      .then(function(data) { pokemonCache[id] = data; })
+      .catch(function() { /* ignore hover prefetch failures */ });
+  }
+  $(document).on("mouseenter focus", ".cont-pokemon", function() {
+    var id = parseInt($(this).data("id"), 10);
+    if (!id) return;
+    if (hoverPrefetchTimers[id]) clearTimeout(hoverPrefetchTimers[id]);
+    hoverPrefetchTimers[id] = setTimeout(function() {
+      delete hoverPrefetchTimers[id];
+      prefetchDetail(id - 1);
+      prefetchDetail(id + 1);
+    }, 150);
+  });
+  $(document).on("mouseleave blur", ".cont-pokemon", function() {
+    var id = parseInt($(this).data("id"), 10);
+    if (hoverPrefetchTimers[id]) {
+      clearTimeout(hoverPrefetchTimers[id]);
+      delete hoverPrefetchTimers[id];
+    }
+  });
+
   // ── Search (debounced) ─────────────────────────────────────────────────
   $('#myInput').on('keyup', debounce(function() { applyFilters(); }, 200));
 

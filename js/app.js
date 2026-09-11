@@ -888,9 +888,10 @@ $(document).ready(function () {
 
     if (!batch.length) { isLoadingBatch = false; return; }
 
-    // Spinner only when the batch actually needs the network
+    // Show progress when the batch actually needs the network.
     if (batch.some(function(entry) { return !pokemonCache[entry.entry_number]; })) {
       showLoadMore();
+      updateLoadMoreProgress(loadedCount, pokemonEntries.length);
     }
 
     asyncMapConcurrent(batch, function(entry) {
@@ -927,6 +928,18 @@ $(document).ready(function () {
       isLoadingBatch = false;
       hideLoadMore();
     });
+  }
+
+  // Update the load-more indicator with current progress.
+  function updateLoadMoreProgress(loaded, total) {
+    var $indicator = $('#load-more-indicator');
+    if (!$indicator.length) return;
+    var $span = $indicator.find('span');
+    if (loaded >= total) {
+      $span.text('All ' + total + ' Pokémon loaded');
+    } else {
+      $span.text('Loaded ' + loaded + ' of ' + total + ' Pokémon');
+    }
   }
 
   // ── Species: lazy on-demand (not prefetched) ───────────────────────────

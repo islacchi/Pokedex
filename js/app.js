@@ -841,6 +841,12 @@ $(document).ready(function () {
     if (isLoadingBatch) return;
     if (loadedCount >= pokemonEntries.length) return;
     if ($('#detail-view').hasClass('visible')) return;
+    // Prefetch earlier when fewer items remain, so the next batch is ready
+    // before the user reaches the very end of the loaded list.
+    var remaining = pokemonEntries.length - loadedCount;
+    var lastLoadedIndex = loadedCount - 1;
+    var prefetchThreshold = Math.max(BATCH_SIZE * 2, Math.floor(pokemonEntries.length * 0.1));
+    if (remaining > prefetchThreshold) return; // Plenty left, sentinel will catch it.
     fetchNextBatch();
   }
 
@@ -852,7 +858,7 @@ $(document).ready(function () {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) checkPrefetch();
       });
-    }, { root: screenEl, rootMargin: '300px 0px', threshold: 0.01 });
+    }, { root: screenEl, rootMargin: '800px 0px', threshold: 0.01 });
   }
 
   function setupPrefetchSentinel() {

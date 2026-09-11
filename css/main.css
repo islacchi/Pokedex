@@ -518,6 +518,37 @@ body {
   to { transform: rotate(360deg); }
 }
 
+
+.no-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.reset-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #2a3a4a, #1e2a3a);
+  color: #aaf0ff;
+  border: 1px solid #3a4a5a;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+}
+
+.reset-btn:hover {
+  background: linear-gradient(180deg, #3a4a5a, #2a3a4a);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.reset-btn:active {
+  transform: translateY(1px);
+}
+
 /* ── No Results ──────────────────────────────────────────────────── */
 .no-results {
   display: flex;
@@ -2279,6 +2310,18 @@ body.light-theme #myInput::placeholder {
 
 body.light-theme #myInput:focus {
   background: #fff;
+}
+
+
+body.light-theme .reset-btn {
+  background: linear-gradient(180deg, #ffffff, #f0f0f5);
+  color: #1a3a4a;
+  border-color: #b0c4d8;
+}
+
+body.light-theme .reset-btn:hover {
+  background: linear-gradient(180deg, #ffffff, #e0e8f0);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 body.light-theme .pokedex-screen::-webkit-scrollbar-track {

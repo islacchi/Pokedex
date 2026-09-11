@@ -776,6 +776,7 @@ $(document).ready(function () {
       } else {
         $('#no-results').removeClass('hidden');
         $('#no-favorites').addClass('hidden');
+        renderEmptyStateActions();
       }
     } else {
       $('#no-results').addClass('hidden');
@@ -2240,11 +2241,65 @@ $(document).ready(function () {
     applyFilters();
   });
 
+  // --- Empty State Actions ---
+  function hasActiveFilters() {
+    var searchVal = $('#myInput').val().trim();
+    if (searchVal) return true;
+    if (selectedGen !== 'all') return true;
+    if (Object.keys(selectedTypes).length > 0) return true;
+    return false;
+  }
+
+  function renderEmptyStateActions() {
+    var $container = $('#no-results-actions');
+    if (!$container.length) return;
+    $container.empty();
+    var searchVal = $('#myInput').val().trim();
+    if (searchVal) {
+      $container.append('<button class="reset-btn" id="empty-clear-search">Clear Search</button>');
+    }
+    if (selectedGen !== 'all') {
+      $container.append('<button class="reset-btn" id="empty-reset-gen">Reset Generation</button>');
+    }
+    if (Object.keys(selectedTypes).length > 0) {
+      $container.append('<button class="reset-btn" id="empty-reset-types">Reset Types</button>');
+    }
+    if (searchVal || selectedGen !== 'all' || Object.keys(selectedTypes).length > 0) {
+      $container.append('<button class="reset-btn" id="empty-reset-all">Reset All</button>');
+    }
+  }
+
   // ── Favorites Filter ───────────────────────────────────────────────────
   $('#fav-filter').on('click', function() {
     favFilterActive = !favFilterActive;
     $(this).toggleClass('active', favFilterActive);
     applyFilters();
+  });
+
+  // --- Empty state button handlers ---
+  $(document).on('click', '#empty-clear-search', function() {
+    $('#myInput').val('').focus();
+    syncClearSearch();
+    applyFilters();
+  });
+  $(document).on('click', '#empty-reset-gen', function() {
+    $('.gen-chip[data-gen="all"]').trigger('click');
+  });
+  $(document).on('click', '#empty-reset-types', function() {
+    $('.type-chip').removeClass('active');
+    selectedTypes = {};
+    applyFilters();
+  });
+  $(document).on('click', '#empty-reset-all', function() {
+    $('#myInput').val('');
+    syncClearSearch();
+    $('.type-chip').removeClass('active');
+    selectedTypes = {};
+    $('.gen-chip[data-gen="all"]').trigger('click');
+    applyFilters();
+  });
+  $(document).on('click', '#browse-all-btn', function() {
+    $('#fav-filter').trigger('click');
   });
 
   // ── Sort ───────────────────────────────────────────────────────────────

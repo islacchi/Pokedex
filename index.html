@@ -125,12 +125,16 @@
             <div id="no-results" class="no-results hidden">
                 <span class="no-results-icon">🔍</span>
                 <p class="no-results-title">No Pokémon found</p>
-                <p class="no-results-hint">Try adjusting your search or filters.</p>
+                <p class="no-results-hint" id="no-results-hint">Try adjusting your search or filters.</p>
+                <div class="no-results-actions" id="no-results-actions"></div>
             </div>
             <div id="no-favorites" class="no-results hidden">
                 <span class="no-results-icon">★</span>
                 <p class="no-results-title">No favorites yet</p>
                 <p class="no-results-hint">Tap the ★ on any Pokémon to add it to your favorites.</p>
+                <div class="no-results-actions">
+                    <button id="browse-all-btn" class="reset-btn">Browse All Pokémon</button>
+                </div>
             </div>
             <div id="skeleton-grid" class="pokemon-grid skeleton-grid hidden"></div>
             <div id="elementos" class="pokemon-grid"></div>

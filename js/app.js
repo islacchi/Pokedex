@@ -1781,18 +1781,37 @@ $(document).ready(function () {
     var p = pokemonCache[currentDetailId];
     if (!p) return;
 
-    currentShiny = !currentShiny;
-    var sprite = getDetailSprite(p.sprites, currentShiny) || fallbackSprite(p.id);
+    var nextShiny = !currentShiny;
+    var sprite = getDetailSprite(p.sprites, nextShiny) || fallbackSprite(p.id);
 
     var $img = $('#elementos-pkm .specific-info');
-    if ($img.length) {
-      var imgEl = $img[0];
+    if (!$img.length) {
+      currentShiny = nextShiny;
+      $('.shiny-toggle').toggleClass('active', currentShiny);
+      return;
+    }
+
+    // Preload the new sprite, then crossfade between old and new.
+    var imgEl = $img[0];
+    var tempImg = new Image();
+    tempImg.onload = function() {
+      $img.fadeTo(120, 0.3, function() {
+        imgEl.src = sprite;
+        imgEl.removeAttribute('data-src');
+        imgEl.onerror = makeErrorHandler(imgEl, currentDetailId, capitalize(p.name), sprite, 1);
+        $img.fadeTo(120, 1);
+      });
+    };
+    tempImg.onerror = function() {
+      // Fallback: just swap the source directly.
       imgEl.src = PLACEHOLDER_SVG;
       imgEl.setAttribute('data-src', sprite);
       imgEl.onerror = makeErrorHandler(imgEl, currentDetailId, capitalize(p.name), sprite, 1);
       observeImage(imgEl);
-    }
+    };
+    tempImg.src = sprite;
 
+    currentShiny = nextShiny;
     $('.shiny-toggle').toggleClass('active', currentShiny);
   }
 

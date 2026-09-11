@@ -45,7 +45,8 @@ body.light-theme {
   --text-meta-secondary: #6a8a9a;
 }
 
-/* ── Reset & Base ─────────────────────────────────────────────────── */
+/* ── Button Press Feedback ────────────────────────────────────────────────
+/* ── Reset & Base ────────────────────────────────────────────────
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -185,7 +186,7 @@ body {
 }
 
 .theme-toggle:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #0a1a2a;
 }
 
@@ -212,7 +213,7 @@ body {
 }
 
 .random-btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #0a1a2a;
 }
 
@@ -240,7 +241,7 @@ body {
 }
 
 .clear-search:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #0a1a2a;
 }
 
@@ -546,7 +547,7 @@ body {
 }
 
 .reset-btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
 }
 
 /* ── No Results ──────────────────────────────────────────────────── */
@@ -760,7 +761,7 @@ body {
 }
 
 .load-more-btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #5a0000;
 }
 
@@ -813,7 +814,7 @@ body {
 }
 
 .scroll-top-btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #5a0000;
 }
 
@@ -847,6 +848,9 @@ body {
   position: relative;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.cont-pokemon:active {
+  transform: translateY(-4px) scale(0.97);
 }
 
 .cont-pokemon:hover {
@@ -953,7 +957,7 @@ body {
 }
 
 .nav-btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.96);
   box-shadow: 0 1px 0 #0a1a2a, 0 2px 4px rgba(0,0,0,0.3);
 }
 
@@ -1141,7 +1145,7 @@ body {
 }
 
 .cry-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.95) scale(0.96);
 }
 
 /* ── Type Matchup Section ────────────────────────────────────────── */
@@ -1608,7 +1612,7 @@ body.light-theme .gender-bar {
 }
 
 .back-btn:active {
-  transform: translateY(2px);
+  transform: translateY(2px) scale(0.96);
   box-shadow: 0 1px 0 #5a0000, 0 2px 4px rgba(0,0,0,0.3);
 }
 

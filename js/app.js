@@ -1809,9 +1809,23 @@ $(document).ready(function () {
 
   function navigateTo(id) {
     if (!id) return;
-    // Full-screen skeleton only when a network round-trip is actually needed
-    if (!pokemonCache[id] || !speciesCache[id]) showLoading();
-    var fetchPokemon = pokemonCache[id]
+
+    // Instant path: both Pokémon and species already cached.
+    var hasPokemon = !!pokemonCache[id];
+    var hasSpecies = !!speciesCache[id];
+    if (hasPokemon && hasSpecies) {
+      renderDetail(id);
+      showDetailView();
+      updateUrlHash(id);
+      $('.pokedex-screen').scrollTop(0);
+      // Background-refresh species if it was fetched long ago.
+      fetchSpeciesIfNeeded(id);
+      return;
+    }
+
+    // Loading path: at least one resource requires a network round-trip.
+    showLoading();
+    var fetchPokemon = hasPokemon
       ? $.Deferred().resolve(pokemonCache[id]).promise()
       : ajaxWithRetry({ url: 'https://pokeapi.co/api/v2/pokemon/' + id, type: 'GET', dataType: 'json' }, 1)
           .then(function(data) { pokemonCache[id] = data; return data; });

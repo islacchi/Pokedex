@@ -1936,29 +1936,40 @@ $(document).ready(function () {
     var initialBatch = entries.slice(0, BATCH_SIZE);
     showSkeletons(9);
 
+    // Track which Pokémon have been rendered so we can append progressively.
+    var renderedIds = {};
+    function appendSingleCard(id) {
+      if (renderedIds[id]) return;
+      renderedIds[id] = true;
+      var data = pokemonCache[id];
+      if (!data) return;
+      if (allPokemonDetails.some(function(p) { return p.id === id; })) return;
+      allPokemonDetails.push({
+        id: id, name: data.name,
+        sprites: data.sprites, types: data.types, stats: data.stats,
+        height: data.height, weight: data.weight
+      });
+    }
+
     asyncMapConcurrent(initialBatch, function(entry) {
       var id = entry.entry_number;
-      if (pokemonCache[id]) return $.Deferred().resolve(pokemonCache[id]).promise();
+      if (pokemonCache[id]) {
+        // Cached: render immediately without waiting for the batch to finish.
+        appendSingleCard(id);
+        renderProgressiveCard(id);
+        return $.Deferred().resolve(pokemonCache[id]).promise();
+      }
       return ajaxWithRetry({
         url: 'https://pokeapi.co/api/v2/pokemon/' + id,
         type: 'GET', dataType: 'json'
       }, 1).then(function(data) {
         pokemonCache[id] = data;
+        appendSingleCard(id);
+        renderProgressiveCard(id);
         return data;
       });
     }, CONCURRENCY)
     .then(function() {
-      initialBatch.forEach(function(entry) {
-        var id   = entry.entry_number;
-        var data = pokemonCache[id];
-        if (data && !allPokemonDetails.some(function(p) { return p.id === id; })) {
-          allPokemonDetails.push({
-            id: id, name: data.name,
-            sprites: data.sprites, types: data.types, stats: data.stats,
-            height: data.height, weight: data.weight
-          });
-        }
-      });
       loadedCount = initialBatch.length;
       allPokemonDetails.sort(function(a, b) { return a.id - b.id; });
       applyFilters();
@@ -1969,6 +1980,48 @@ $(document).ready(function () {
       hideSkeletons();
       swal('Error!', 'Failed to load Pokémon data. Please try again.', 'error');
     });
+  }
+
+  // Render a single card into the grid without rebuilding the whole list.
+  function renderProgressiveCard(id) {
+    var data = pokemonCache[id];
+    if (!data) return;
+    var $grid = $('#elementos');
+    if ($grid.find('.cont-pokemon[data-id="' + id + '"]').length) return;
+    var cardHtml = buildCardHtml({
+      id: id,
+      name: data.name,
+      sprites: data.sprites,
+      types: data.types,
+      stats: data.stats,
+      height: data.height,
+      weight: data.weight
+    });
+    $grid.append(cardHtml);
+    var $newImg = $grid.find('.cont-pokemon[data-id="' + id + '"] .img-pkmn');
+    if ($newImg.length) {
+      var imgEl = $newImg[0];
+      var staticUrl = $(imgEl).attr('data-src');
+      var animatedUrl = $(imgEl).attr('data-animated');
+      imgEl.setAttribute('data-src', animatedUrl || staticUrl);
+      imgEl.onerror = function() {
+        var current = imgEl.getAttribute('data-src');
+        if (current === animatedUrl && staticUrl) {
+          imgEl.setAttribute('data-src', staticUrl);
+          imgEl.src = staticUrl;
+        } else {
+          imgEl.src = PLACEHOLDER_SVG;
+          imgEl.onerror = null;
+        }
+      };
+      observeImage(imgEl);
+    }
+    // Fade in the new card.
+    $grid.find('.cont-pokemon[data-id="' + id + '"]').hide().fadeIn(150);
+    // Once enough cards are visible, hide the skeleton grid.
+    if (allPokemonDetails.length >= 6 && !$('#skeleton-grid').hasClass('hidden')) {
+      hideSkeletons();
+    }
   }
 
   function fetchPokedex() {
